@@ -1,6 +1,20 @@
 import { ttySetRaw } from 'os'
 import { in as stdin } from 'std'
 
+/**
+ * @module terminal
+ * A module for handling keyboard input in a terminal environment.
+ */
+
+/**
+ * @typedef {Object.<string, string>} KeySequences
+ * An object mapping key names to their corresponding escape sequences.
+ */
+
+/**
+ * @type {KeySequences}
+ * A predefined object containing key sequences for various keyboard inputs.
+ */
 const keySequences = {
   // Arrow keys
   'ArrowUp': '\x1b[A',
@@ -43,27 +57,71 @@ const keySequences = {
   'Ctrl+D': '\x04'
 };
 
+
 /**
- * Handles a key press event and triggers a callback function when the specified key is pressed.
- * @param {string} key - The key sequence to listen for.
- * @param {function} cb - The callback function to execute when the key is pressed.
+ * @callback QuitFunction
+ * A function that, when called, exits the key handling loop.
  */
-const handleKeyPress = async (key, cb) => {
-  ttySetRaw(2);
-  while (true) {
-    const input = stdin.readAsString(1);
-    if (input === key) { cb(); return }
-  }
-}
 
+/**
+ * @callback KeyHandler
+ * @param {QuitFunction} quit - A function to exit the key handling loop.
+ */
+
+/**
+ * @typedef {Object.<string, KeyHandler>} KeyHandlers
+ * An object mapping key sequences to their corresponding handler functions.
+ */
+
+/**
+ * Sets up a key press handling loop for the specified key sequences.
+ * 
+ * @param {KeyHandlers} keysAndCb - An object where keys are key sequences (either from keySequences or custom strings) and values are handler functions.
+ * 
+ * @example
+ * handleKeysPress({
+ *   'j': () => console.log('j pressed'),
+ *   [keySequences.ArrowUp]: () => console.log('Arrow up pressed'),
+ *   [keySequences.Enter]: (quit) => { console.log('Enter pressed'); quit(); }
+ * });
+ * 
+ * @description
+ * - The function sets the terminal to raw mode for direct key input.
+ * - It continuously reads input until the quit function is called.
+ * - Each key handler receives a `quit` function as an argument, which can be called to exit the handling loop.
+ * - The Escape key is treated specially: pressing it twice will exit the loop if no specific Escape handler is provided.
+ * - For other keys, their corresponding handler functions are called when the key sequence is matched.
+ */
 const handleKeysPress = (keysAndCb) => {
+  let exit = false;
+  const quit = () => exit = true;
   ttySetRaw(2);
+  let escapeSequence = '';
+  const keys = Object.keys(keysAndCb);
   while (true) {
+    if (exit) return;
     const input = stdin.readAsString(1);
-    if (Object.keys(keysAndCb).includes(input)) keysAndCb[input]();
+    escapeSequence += input;
+
+    if (escapeSequence === keySequences.Escape) {
+      const nextChar = stdin.readAsString(1);
+      if (nextChar === keySequences.Escape) keys.includes(keySequences.Escape) ? keysAndCb[keySequences.Escape](quit) : quit();
+      else escapeSequence += nextChar;
+      continue;
+    }
+
+    if (keys.includes(escapeSequence)) { keysAndCb[escapeSequence](quit); escapeSequence = '' }
+    escapeSequence = '';
   }
 }
 
+let count = 0;
+handleKeysPress({
+  j: () => { print('j pressed'); count++ },
+  k: () => { print('k pressed'); count++ },
+  [keySequences.ArrowUp]: () => print('arrow up'),
+  [keySequences.Enter]: (quit) => { print('count: ', count); quit() },
+  [keySequences.Escape]: (quit) => { print('Bye!!!'); quit() }
+})
 
-
-export { keySequences, handleKeyPress }
+export { keySequences, handleKeysPress }
