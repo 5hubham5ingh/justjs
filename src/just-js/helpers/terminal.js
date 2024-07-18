@@ -115,6 +115,33 @@ const handleKeysPress = (keysAndCb) => {
   }
 }
 
+
+/**
+ * @module terminal
+ * A module for terminal-related utilities.
+ */
+
+/**
+ * Retrieves the current size of the terminal window.
+ *
+ * @function getTerminalSize
+ * @returns {[number, number]} An array containing the width and height of the terminal in characters.
+ *
+ * @description
+ * This function attempts to determine the size of the terminal window using the following methods:
+ * 1. If the output is connected to a TTY (terminal), it uses the ttyGetWinSize function.
+ * 2. If not connected to a TTY, it tries to read the COLUMNS and LINES environment variables.
+ * 3. If neither method works, it returns a default size of [50, 10].
+ *
+ * @example
+ * const [width, height] = getTerminalSize();
+ * console.log(`Terminal size: ${width}x${height}`);
+ */
+const getTerminalSize = () => {
+  const [width, height] = isatty(1) ? ttyGetWinSize(1) : [getenv('COULMNS'), getenv('LINES')]
+  return !width && !height ? [50, 10] : [width, height]
+}
+
 let count = 0;
 handleKeysPress({
   j: () => { print('j pressed'); count++ },
@@ -124,4 +151,4 @@ handleKeysPress({
   [keySequences.Escape]: (quit) => { print('Bye!!!'); quit() }
 })
 
-export { keySequences, handleKeysPress }
+export { keySequences, handleKeysPress, getTerminalSize }
