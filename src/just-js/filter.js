@@ -1,12 +1,12 @@
-import { cursorUp, cursorLeft, cursorNextLine, eraseScreen, clearTerminal, cursorTo, clearScreen } from './helpers/cursor.js';
+import { cursorUp, cursorLeft, cursorNextLine, scrollDown, eraseScreen, clearTerminal, cursorTo, clearScreen, scrollUp } from './helpers/cursor.js';
 import { ansi } from './helpers/ansiStyle.js'
 import { ttySetRaw } from 'os'
 import { in as stdin, out as stdout } from 'std'
 import { handleKeysPress, keySequences } from './helpers/terminal.js';
 
 const drawLayout = (header, inputField, item) => {
-  const ui = `${header ? header + '\n' : ''}${inputField ? inputField + '\n' : ''}${item}`
-  print(clearScreen, cursorTo(0, 0), ui)
+  const ui = `\n${header ? header + '\n' : ''}${inputField ? inputField + '\n' : ''}${item}`
+  print(clearScreen, cursorTo(0, 0), ui, scrollUp)
 }
 
 const Filter = (list, headerText, placeHolderText, style) => {
