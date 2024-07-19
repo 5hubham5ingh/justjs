@@ -1,53 +1,61 @@
-import { cursorUp, cursorLeft, cursorNextLine, eraseScreen, clearTerminal } from './helpers/cursor.js';
-import { ansi } from './helpers/ansi.js'
+import { cursorUp, cursorLeft, cursorNextLine, eraseScreen, clearTerminal, cursorTo, clearScreen } from './helpers/cursor.js';
+import { ansi } from './helpers/ansiStyle.js'
 import { ttySetRaw } from 'os'
 import { in as stdin, out as stdout } from 'std'
 import { handleKeysPress, keySequences } from './helpers/terminal.js';
 
 const drawLayout = (header, inputField, item) => {
-  //  console.log("\x1b[2J\x1b[H");
-  print(clearTerminal)
-  const ui = `${header}
-${inputField}
-${item}`
-  print(ui)
+  const ui = `${header ? header + '\n' : ''}${inputField ? inputField + '\n' : ''}${item}`
+  print(clearScreen, cursorTo(0, 0), ui)
 }
 
-const filter = (list) => {
-  return new Promise((resolve, reject) => {
-    let selection;
-    const header = "Filter";
-    const placeHolder = "Type to search."
+const Filter = (list, headerText, placeHolderText, style) => {
+  return new Promise((resolve) => {
+    let selection = 0;
+    const header = (headerText !== '' && headerText) ? headerText : ''
+    const placeHolder = (placeHolderText !== '' && placeHolderText) ? placeHolderText : ''
     const inputField = placeHolder;
-    if (!selection) selection = 0;
+
     let items = list.map((item, index) => `${index === selection ? '> ' : ''}${item}\n`).join('')
 
     drawLayout(header, inputField, items)
 
+    const generateItems = () => list.map((item, index) => `${index === selection ? '> ' : ''}${item}\n`).join('');
+
+    const selectNext = () => {
+      selection = (selection + 1) % list.length;
+      items = generateItems()
+      drawLayout(header, inputField, items)
+    };
+
+    const selectPrev = () => {
+      selection = (selection - 1 + list.length) % list.length;
+      items = generateItems()
+      drawLayout(header, inputField, items)
+    };
+
+    const handleSelection = (quit) => {
+      quit();
+      const selected = list[selection];
+      resolve(selected)
+    };
+
+    const handleExit = (quit) => {
+      quit();
+      resolve(null);
+    }
+
     const keyPressHandlers = {
-      [keySequences.ArrowUp]: () => {
-        selection--;
-        items = list.map((item, index) => `${index === selection ? '> ' : ''}${item}\n`).join('')
-        drawLayout(header, inputField, items)
-      },
-      [keySequences.ArrowDown]: () => {
-        selection++;
-        items = list.map((item, index) => `${index === selection ? '> ' : ''}${item}\n`).join('')
-        drawLayout(header, inputField, items)
-      },
-      [keySequences.Enter]: (quit) => {
-        quit();
-        const selected = list[selection];
-        print('You selected: ', selected);
-        resolve(selected)
-      }
+      [keySequences.ArrowUp]: selectPrev,
+      [keySequences.ArrowDown]: selectNext,
+      [keySequences.Enter]: handleSelection,
+      [keySequences.Escape]: handleExit
     }
 
     handleKeysPress(keyPressHandlers)
-    reject(null)
   })
 }
 
 
-const selected = await filter(['option 1', 'option 2', 'option 3'])
+const selected = await Filter(['option 1', 'option 2', 'option 3'])
 console.log('Retured from filter: ', selected)

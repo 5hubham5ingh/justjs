@@ -13,10 +13,10 @@ export const cursorTo = (x, y) => {
   }
 
   if (typeof y !== 'number') {
-    return ESC + (x + 1) + 'G';
+    return ESC + x + 'G';
   }
 
-  return ESC + (y + 1) + SEP + (x + 1) + 'H';
+  return ESC + y + SEP + (x + 1) + 'H';
 };
 
 export const cursorMove = (x, y) => {
