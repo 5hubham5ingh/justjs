@@ -2,7 +2,7 @@ import { cursorUp, cursorLeft, cursorNextLine, eraseScreen, clearTerminal } from
 import { ansi } from './helpers/ansi.js'
 import { ttySetRaw } from 'os'
 import { in as stdin, out as stdout } from 'std'
-import { keySequences } from './helpers/terminal.js';
+import { handleKeysPress, keySequences } from './helpers/terminal.js';
 
 const drawLayout = (header, inputField, item) => {
   //  console.log("\x1b[2J\x1b[H");
@@ -13,53 +13,41 @@ ${item}`
   print(ui)
 }
 
-let selection;
 const filter = (list) => {
-  const header = "Filter";
-  const placeHolder = "Type to search."
-  const inputField = placeHolder;
-  if (!selection) selection = 0;
-  let items = list.map((item, index) => `${index === selection ? '> ' : ''}${item}\n`).join('')
+  return new Promise((resolve, reject) => {
+    let selection;
+    const header = "Filter";
+    const placeHolder = "Type to search."
+    const inputField = placeHolder;
+    if (!selection) selection = 0;
+    let items = list.map((item, index) => `${index === selection ? '> ' : ''}${item}\n`).join('')
 
-  ttySetRaw(2);
-  drawLayout(header, inputField, items)
-  let escapeSequence = '';
+    drawLayout(header, inputField, items)
 
-  while (true) {
-    const char = stdin.readAsString(1);
-
-    escapeSequence += char;
-
-    switch (escapeSequence) {
-      case keySequences.ArrowUp:
+    const keyPressHandlers = {
+      [keySequences.ArrowUp]: () => {
         selection--;
         items = list.map((item, index) => `${index === selection ? '> ' : ''}${item}\n`).join('')
         drawLayout(header, inputField, items)
-        escapeSequence = '';
-        break;
-
-      case 'j':
-      case keySequences.ArrowDown:
+      },
+      [keySequences.ArrowDown]: () => {
         selection++;
         items = list.map((item, index) => `${index === selection ? '> ' : ''}${item}\n`).join('')
         drawLayout(header, inputField, items)
-        escapeSequence = '';
-        break;
-
-      case keySequences.Enter:
-        return list[selection]
-
-      default:
-        if (escapeSequence !== keySequences.Escape) escapeSequence = '';
-        else {
-          const nextChar = stdin.readAsString(1);
-          if (nextChar === keySequences.Escape) return null;
-          else escapeSequence += nextChar;
-        }
+      },
+      [keySequences.Enter]: (quit) => {
+        quit();
+        const selected = list[selection];
+        print('You selected: ', selected);
+        resolve(selected)
+      }
     }
-  }
+
+    handleKeysPress(keyPressHandlers)
+    reject(null)
+  })
 }
 
 
-const selected = filter(['option 1', 'option 2', 'option 3'])
-console.log('You selected: ', selected)
+const selected = await filter(['option 1', 'option 2', 'option 3'])
+console.log('Retured from filter: ', selected)

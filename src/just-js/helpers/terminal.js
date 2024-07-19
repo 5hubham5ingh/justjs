@@ -95,11 +95,10 @@ const keySequences = {
 const handleKeysPress = (keysAndCb) => {
   let exit = false;
   const quit = () => exit = true;
-  ttySetRaw(2);
+  ttySetRaw();
   let escapeSequence = '';
   const keys = Object.keys(keysAndCb);
-  while (true) {
-    if (exit) return;
+  while (!exit) {
     const input = stdin.readAsString(1);
     escapeSequence += input;
 
@@ -143,12 +142,12 @@ const getTerminalSize = () => {
 }
 
 let count = 0;
-handleKeysPress({
-  j: () => { print('j pressed'); count++ },
-  k: () => { print('k pressed'); count++ },
-  [keySequences.ArrowUp]: () => print('arrow up'),
-  [keySequences.Enter]: (quit) => { print('count: ', count); quit() },
-  [keySequences.Escape]: (quit) => { print('Bye!!!'); quit() }
-})
+// handleKeysPress({
+//   j: () => { print('j pressed'); count++ },
+//   k: () => { print('k pressed'); count++ },
+//   [keySequences.ArrowUp]: () => print('arrow up'),
+//   [keySequences.Enter]: (quit) => { print('count: ', count); quit() },
+//   [keySequences.Escape]: (quit) => { print('Bye!!!'); quit() }
+// })
 
 export { keySequences, handleKeysPress, getTerminalSize }
