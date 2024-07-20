@@ -2,11 +2,6 @@ import { ttySetRaw } from 'os'
 import { in as stdin } from 'std'
 
 /**
- * @module terminal
- * A module for handling keyboard input in a terminal environment.
- */
-
-/**
  * @typedef {Object.<string, string>} KeySequences
  * An object mapping key names to their corresponding escape sequences.
  */
@@ -54,8 +49,37 @@ const keySequences = {
   // Other special keys
   'Ctrl+C': '\x03',
   'Ctrl+Z': '\x1a',
-  'Ctrl+D': '\x04'
+  'Ctrl+D': '\x04',
+
+  // Key groups
+  capitalLetters: 'capitalLetters',
+  smallLetters: 'smallLetters',
+  numbers: 'numbers'
 };
+
+
+const mapCapitalLetterKeys = (keysAndCb) => {
+  const capitalLettersCb = keysAndCb[keySequences.capitalLetters];
+  for (let i = 65; i < 90; i++)
+    keysAndCb[String.fromCharCode(i)] = capitalLettersCb;
+  delete keysAndCb[keySequences.capitalLetters];
+}
+
+const mapSmallLetterKeys = (keysAndCb) => {
+  const smallLettersCb = keysAndCb[keySequences.smallLetters];
+  for (let i = 97; i < 122; i++)
+    keysAndCb[String.fromCharCode(i)] = smallLettersCb;
+  delete keysAndCb[keySequences.smallLetters];
+}
+
+const mapNumberkeys = (keysAndCb) => {
+  const numberCb = keysAndCb[keySequences.numbers];
+  for (let i = 0; i < 10; i++)
+    keysAndCb[`${i}`] = numberCb;
+  delete keysAndCb[keySequences.numbers];
+}
+
+
 
 
 /**
@@ -95,9 +119,12 @@ const keySequences = {
 const handleKeysPress = (keysAndCb) => {
   let exit = false;
   const quit = () => exit = true;
-  ttySetRaw();
   let escapeSequence = '';
   const keys = Object.keys(keysAndCb);
+  if (keys.includes(keySequences.capitalLetters)) mapCapitalLetterKeys(keysAndCb);
+  if (keys.includes(keySequences.smallLetters)) mapSmallLetterKeys(keysAndCb);
+  if (keys.includes(keySequences.numbers)) mapNumberkeys(keysAndCb);
+  ttySetRaw();
   while (!exit) {
     const input = stdin.readAsString(1);
     escapeSequence += input;
@@ -114,11 +141,6 @@ const handleKeysPress = (keysAndCb) => {
   }
 }
 
-
-/**
- * @module terminal
- * A module for terminal-related utilities.
- */
 
 /**
  * Retrieves the current size of the terminal window.
