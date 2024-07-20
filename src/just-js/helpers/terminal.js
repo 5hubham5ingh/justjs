@@ -1,15 +1,6 @@
 import { ttySetRaw } from 'os'
 import { in as stdin } from 'std'
 
-/**
- * @typedef {Object.<string, string>} KeySequences
- * An object mapping key names to their corresponding escape sequences.
- */
-
-/**
- * @type {KeySequences}
- * A predefined object containing key sequences for various keyboard inputs.
- */
 const keySequences = {
   // Arrow keys
   'ArrowUp': '\x1b[A',
@@ -44,7 +35,7 @@ const keySequences = {
   'Enter': '\r',
   'Escape': '\x1b',
   'Tab': '\t',
-  'Backspace': '\b',
+  'Backspace': '\x7F',
 
   // Other special keys
   'Ctrl+C': '\x03',
@@ -120,10 +111,11 @@ const handleKeysPress = (keysAndCb) => {
   let exit = false;
   const quit = () => exit = true;
   let escapeSequence = '';
-  const keys = Object.keys(keysAndCb);
+  let keys = Object.keys(keysAndCb);
   if (keys.includes(keySequences.capitalLetters)) mapCapitalLetterKeys(keysAndCb);
   if (keys.includes(keySequences.smallLetters)) mapSmallLetterKeys(keysAndCb);
   if (keys.includes(keySequences.numbers)) mapNumberkeys(keysAndCb);
+  keys = Object.keys(keysAndCb);
   ttySetRaw();
   while (!exit) {
     const input = stdin.readAsString(1);
@@ -131,12 +123,12 @@ const handleKeysPress = (keysAndCb) => {
 
     if (escapeSequence === keySequences.Escape) {
       const nextChar = stdin.readAsString(1);
-      if (nextChar === keySequences.Escape) keys.includes(keySequences.Escape) ? keysAndCb[keySequences.Escape](quit) : quit();
+      if (nextChar === keySequences.Escape) keys.includes(keySequences.Escape) ? keysAndCb[keySequences.Escape](escapeSequence, quit) : quit();
       else escapeSequence += nextChar;
       continue;
     }
 
-    if (keys.includes(escapeSequence)) { keysAndCb[escapeSequence](quit); escapeSequence = '' }
+    if (keys.includes(escapeSequence)) { keysAndCb[escapeSequence](escapeSequence, quit); escapeSequence = '' }
     escapeSequence = '';
   }
 }
@@ -168,8 +160,9 @@ let count = 0;
 //   j: () => { print('j pressed'); count++ },
 //   k: () => { print('k pressed'); count++ },
 //   [keySequences.ArrowUp]: () => print('arrow up'),
-//   [keySequences.Enter]: (quit) => { print('count: ', count); quit() },
-//   [keySequences.Escape]: (quit) => { print('Bye!!!'); quit() }
+//   [keySequences.Enter]: (key, quit) => { print('count: ', count); quit() },
+//   [keySequences.Escape]: (key, quit) => { print('Bye!!!'); quit() },
+//   [keySequences.Backspace]: (key, quit) => { print('back!!'); quit() }
 // })
 
 export { keySequences, handleKeysPress, getTerminalSize }
