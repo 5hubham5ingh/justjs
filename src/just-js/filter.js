@@ -78,24 +78,16 @@ const filterItemFromList = (list, headerText = "Filter", placeHolderText = "Type
       drawLayout(header, inputField, items)
     }
 
-    const handleVimMotions = (key) => {
-      switch (key) {
-        case 'J': selectNext();
-          break;
-        case 'K': selectPrev();
-          break;
-        default:
-      }
-    }
 
     const keyPressHandlers = {
       [keySequences.ArrowUp]: selectPrev,
       [keySequences.ArrowDown]: selectNext,
       [keySequences.Enter]: handleSelection,
       [keySequences.smallLetters]: handleInput,
-      [keySequences.capitalLetters]: handleVimMotions,
       [keySequences.Escape]: handleExit,
-      [keySequences.Backspace]: handleInput
+      [keySequences.Backspace]: handleInput,
+      [keySequences.Tab]: selectNext,
+      [keySequences.ShiftTab]: selectPrev
     }
 
     handleKeysPress(keyPressHandlers)

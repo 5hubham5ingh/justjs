@@ -35,6 +35,7 @@ const keySequences = {
   'Enter': '\r',
   'Escape': '\x1b',
   'Tab': '\t',
+  'ShiftTab': '\x1b[Z',
   'Backspace': '\x7F',
 
   // Other special keys
