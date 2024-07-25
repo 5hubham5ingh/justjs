@@ -90,7 +90,7 @@ const mapNumberkeys = (keysAndCb) => {
  */
 
 /**
- * Sets up a key press handling loop for the specified key sequences.
+ * Sets up a key press handler for the specified key sequences.
  * 
  * @param {KeyHandlers} keysAndCb - An object where keys are key sequences (either from keySequences or custom strings) and values are handler functions.
  * 
@@ -105,7 +105,7 @@ const mapNumberkeys = (keysAndCb) => {
  * - The function sets the terminal to raw mode for direct key input.
  * - It continuously reads input until the quit function is called.
  * - Each key handler receives a `quit` function as an argument, which can be called to exit the handling loop.
- * - The Escape key is treated specially: pressing it twice will exit the loop if no specific Escape handler is provided.
+ * - The Escape key is treated specially: pressing it twice will terminate the key press handler if no specific Escape handler is provided.
  * - For other keys, their corresponding handler functions are called when the key sequence is matched.
  */
 const handleKeysPress = (keysAndCb) => {

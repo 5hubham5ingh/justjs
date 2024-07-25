@@ -6,78 +6,109 @@ import { handleKeysPress, keySequences } from './helpers/terminal.js';
 
 const log = [];
 
-const drawLayout = (header, inputField, items) => {
-  const ui = `\n${header ? header + '\n' : ''}${inputField ? inputField + '\n' : ''}${items.join('\n')}`
+const drawLayout = (prompt, header, inputField, items) => {
+  const ui = `\n${header ? header + '\n' : ''}${inputField ? (prompt ?? '') + inputField + '\n' : ''}${items.join('\n')}`
   print(clearScreen, cursorTo(0, 0), ui, scrollUp)
 }
 
-const applySelectionIndicator = (item, indicator = '•') => {
+let indicator = '•';
+let selectedPrefix = " ◉ ";
+let unselectedPrefix = " ○ ";
+const applySelectionIndicator = item => {
   if (item.includes(indicator)) return item;
   return item.padStart(item.length + indicator.length, indicator);
 };
 
-const removeSelectionIndicator = (item, indicator = '•') => {
-  return item.replace(indicator, '');
+const removeSelectionIndicator = item => {
+  return item.replace(indicator, '')
 };
 
-const applySelectionPrefix = (item, selectedPrefix = " ◉ ") => {
+const applySelectionPrefix = item => {
   if (item.includes(selectedPrefix)) return item;
   return item.padStart(item.length + selectedPrefix.length, selectedPrefix)
 };
 
-const removeSelectionPrefix = (item, selectedPrefix = " ◉ ") => {
+const removeSelectionPrefix = item => {
   return item.replace(selectedPrefix, '');
 };
 
-const applyUnselectionPrefix = (item, unselectedPrefix = " ○ ") => {
+const applyUnselectionPrefix = item => {
   if (item.includes(unselectedPrefix)) return item;
   return item.padStart(item.length + unselectedPrefix.length, unselectedPrefix)
 };
 
-const removeUnselectionPrefix = (item, unselectedPrefix = " ○ ") => {
+const removeUnselectionPrefix = item => {
   return item.replace(unselectedPrefix, '')
 };
 
-const filterItemFromList = (list, headerText = "Filter", placeHolderText = "Type to filter", style) => {
+
+/**
+ * Choose multiple items by filtering a list (press + and - to select and unselect an item respectively, Enter to confirm)
+ *
+ * > just filter --no-limit ...
+ *
+ * @template [T=string]
+ * @param {ListItem<T>[]|string[]} list - list to choose from
+ * @param {object} [opt] - options
+ * @param {string} [opt.headerText="Search"] - header value
+ * @param {string} [opt.placeholderText="Filter..."] - placeholder value (default = "Filter...")
+ * @param {number} [opt.width=COLUMNS] - width of the list (default = terminal width)
+ * @param {number} [opt.height] - height of the list (no limit by default, will depend on the terminal)
+ * @param {string} [opt.prompt="> "] - prompt to display (default = "> ")
+ * @param {string} [opt.value] - initial filter value
+ * @param {number} [opt.limit] - maximum number of items to select (no limit by default)
+ * @param {boolean} [opt.regEx=true] - enable regular expression based search (default = true)
+ * @param {boolean} [opt.reverse=false] - display from the bottom of the screen (default = false)
+ * @param {string} [opt.indicator="•"] - character for selection (default = "•")
+ * @param {string} [opt.selectedPrefix=" ◉ "] - character to indicate selected items (default = " ◉ ")
+ * @param {string} [opt.unselectedPrefix=" ○ "] - character to indicate selected items (default = " ○ ")
+ * @param {CustomOptions} [opt.custom]
+ *
+ * @returns {ListItem<T>[]|undefined}
+ */
+const filterItemsFromList = (list, opt) => {
   return new Promise((resolve) => {
     let selection = 0;
-    const header = headerText; // check if exists then apply style accordingly.
-    const placeHolder = placeHolderText; // check if exists then applly style accordingly.
+    const header = opt?.headerText ?? "Search";
+    const placeHolder = opt?.placeholderText ?? "Filter...";
+    const prompt = opt?.prompt ?? '> ';
     let inputField = placeHolder;
     const selectionBucket = new Set();
 
-    const generateItems = () => list.map((item, index) =>
+    const filterListItems = (query) => {
+      return list.filter(item => item.match(query))
+        .map((filteredItem, index) => {
+          filteredItem = selectionBucket.has(filteredItem)
+            ? applySelectionPrefix(filteredItem)
+            : applyUnselectionPrefix(filteredItem);
+          filteredItem = index === 0
+            ? applySelectionIndicator(filteredItem)
+            : removeSelectionIndicator(filteredItem);
+          return filteredItem;
+        }
+        );
+    }
+
+    let items = filterListItems(opt?.value ?? '.*');
+    drawLayout(prompt, header, inputField, items)
+
+    const generateUpdatedItems = () => items.map((item, index) =>
       index === selection
-        ? (applySelectionIndicator(selectionBucket.has(item)
-          ? applySelectionPrefix(item)
-          : applyUnselectionPrefix(item)))
-        : (selectionBucket.has(item)
-          ? applySelectionPrefix(item)
-          : applyUnselectionPrefix(item))
+        ? applySelectionIndicator(item)
+        : removeSelectionIndicator(item)
     );
 
-    let items = generateItems();
-
-    drawLayout(header, inputField, items)
-
-    const generateUpdatedItems = (filter = false) => {
-      return items.map((item, index) =>
-        index === selection
-          ? applySelectionIndicator(item)
-          : removeSelectionIndicator(item)
-      );
-    }
 
     const selectNext = () => {
       selection = (selection + 1) % items.length;
       items = generateUpdatedItems()
-      drawLayout(header, inputField, items)
+      drawLayout(prompt, header, inputField, items)
     };
 
     const selectPrev = () => {
       selection = (selection - 1 + items.length) % items.length;
       items = generateUpdatedItems()
-      drawLayout(header, inputField, items)
+      drawLayout(prompt, header, inputField, items)
     };
 
     const handleSubmit = (key, quit) => {
@@ -93,24 +124,12 @@ const filterItemFromList = (list, headerText = "Filter", placeHolderText = "Type
       resolve(null);
     };
 
-    const filterListItems = (query) => {
-      return list.filter(item => item.match(query))
-        .map((filteredItem, index) => selectionBucket.has(filteredItem)
-          ? (index === 0 ?
-            applySelectionIndicator(applySelectionPrefix(filteredItem))
-            : applySelectionPrefix(filteredItem))
-          : (index === 0 ?
-            applySelectionIndicator(applyUnselectionPrefix(filteredItem))
-            : applyUnselectionPrefix(filteredItem))
-        );
-    }
-
-    const handleInput = (key) => {
+    const handleInput = (char) => {
       if (!placeHolder) return;
       if (inputField === placeHolder) inputField = '';
-      inputField += key;
+      inputField += char;
       items = filterListItems(inputField);
-      drawLayout(header, inputField, items)
+      drawLayout(prompt, header, inputField, items)
     }
 
     const handleBackspace = () => {
@@ -118,14 +137,15 @@ const filterItemFromList = (list, headerText = "Filter", placeHolderText = "Type
       inputField = inputField.slice(0, inputField.length - 1)
       if (inputField.length === 0) {
         inputField = placeHolder;
-        items = generateItems();
+        items = filterListItems('.*')
       }
       else items = filterListItems(inputField);
-      drawLayout(header, inputField, items)
+      drawLayout(prompt, header, inputField, items)
     }
 
     const markSelected = () => {
-      const currItem = removeSelectionIndicator(removeUnselectionPrefix(items[selection]));
+      if (opt?.limit >= selectionBucket.size) return;
+      const currItem = removeSelectionIndicator(removeSelectionPrefix(removeUnselectionPrefix(items[selection])));
       if (!selectionBucket.has(currItem)) {
         selectionBucket.add(currItem);
         items[selection] = applySelectionPrefix(removeUnselectionPrefix(removeSelectionIndicator(items[selection])));
@@ -134,7 +154,7 @@ const filterItemFromList = (list, headerText = "Filter", placeHolderText = "Type
     }
 
     const markUnselected = () => {
-      const currItem = removeSelectionIndicator(removeSelectionPrefix(items[selection]));
+      const currItem = removeSelectionIndicator(removeUnselectionPrefix(removeSelectionPrefix(items[selection])));
       if (selectionBucket.has(currItem)) {
         selectionBucket.delete(currItem)
         items[selection] = applyUnselectionPrefix(removeSelectionIndicator(removeSelectionPrefix(items[selection])));
@@ -160,13 +180,19 @@ const filterItemFromList = (list, headerText = "Filter", placeHolderText = "Type
   })
 }
 
-const chooseItemFromList = async (list, headerText, style) => await filterItemFromList(list, headerText, '', style);
+const chooseItemFromList = async (list, headerText, style) => await filterItemsFromList(list, headerText, '', style);
 
 
-const selected = await filterItemFromList(['option a', 'option b', 'option c', 'option d', 'option e', 'option f', 'option shubham', 'option singh'], 'filter', 'Type the query').catch(err => print(err))
+const list = ['option a', 'option b', 'option c', 'option d', 'option e', 'option f', 'option shubham', 'option singh'];
+const options = {
+  headerText: 'Filter',
+  placeholderText: 'Type to search...',
+  value: '.*'
+}
+const selected = await filterItemsFromList(list, options).catch(err => print(err))
 //const selected = await chooseItemFromList(['option a', 'option b', 'option c', 'option d', 'option e', 'option f', 'option shubham', 'option singh'], 'Choose one')
 console.log('Retured from filter: ', selected, selected.length, '\n first: ', selected[0], '\n last:', selected[selected.length - 1])
 
 console.log(log.join('\n'))
 
-export { filterItemFromList, chooseItemFromList }
+export { filterItemsFromList, chooseItemFromList }
