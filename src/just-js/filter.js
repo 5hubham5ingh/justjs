@@ -6,14 +6,78 @@ import { handleKeysPress, keySequences } from './helpers/terminal.js';
 
 const log = [];
 
-const drawLayout = (prompt, header, inputField, items) => {
-  const ui = `\n${header ? header + '\n' : ''}${inputField ? (prompt ?? '') + inputField + '\n' : ''}${items.join('\n')}`
-  print(clearScreen, cursorTo(0, 0), ui, scrollUp)
-}
+/**
+ * @template [T=string]
+ * @typedef {Object} ListItem
+ * @property {string} text
+ * @property {T} value
+ */
+
+/**
+ * @template [T=string]
+ * @param {ListItem<T>[]|string[]} list
+ *
+ * @returns {ListItem<T>[]}
+ */
+const buildItems = (list) => {
+  /** @type {ListItem<T>[]} */
+  const items = [];
+  for (const item of list) {
+    if (typeof item === 'object') {
+      items.push({ text: item.text, value: item.value });
+    } else {
+      /** @type {any} */
+      const listItem = { text: item, value: item };
+      items.push(listItem);
+    }
+  }
+  return items;
+};
+
+/**
+ * @template [T=string]
+ * @param {ListItem<T>[]} list
+ * @param {string} value
+ *
+ * @returns {ListItem<T>|undefined}
+ */
+const findItem = (list, value) => {
+  for (const item of list) {
+    if (item.text === value) {
+      return item;
+    }
+  }
+};
+
+/**
+ * @template [T=string]
+ * @param {ListItem<T>[]} list
+ * @param {string[]} values
+ *
+ * @returns {ListItem<T>[]}
+ */
+const findItems = (list, values) => {
+  const items = [];
+  for (const value of values) {
+    const item = findItem(list, value);
+    if (item) {
+      items.push(item);
+    }
+  }
+  return items;
+};
+
 
 let indicator = '•';
 let selectedPrefix = " ◉ ";
 let unselectedPrefix = " ○ ";
+let prompt = '> ';
+
+const drawLayout = (header, inputField, items) => {
+  const ui = `\n${header ? header + '\n' : ''}${inputField ? (prompt ?? '') + inputField + '\n' : ''}${items.join('\n')}`
+  print(clearScreen, cursorTo(0, 0), ui, scrollUp)
+}
+
 const applySelectionIndicator = item => {
   if (item.includes(indicator)) return item;
   return item.padStart(item.length + indicator.length, indicator);
@@ -64,16 +128,25 @@ const removeUnselectionPrefix = item => {
  * @param {string} [opt.unselectedPrefix=" ○ "] - character to indicate selected items (default = " ○ ")
  * @param {CustomOptions} [opt.custom]
  *
- * @returns {ListItem<T>[]|undefined}
+ * @returns {ListItem<T>[]|null}
  */
-const filterItemsFromList = (list, opt) => {
+const filterItemsFromList = (listItems, opt) => {
+
+  const buildItemsList = buildItems(listItems);
+  const list = buildItemsList.map(item => item.text);
+
+  indicator = opt?.indicator ?? indicator;
+  selectedPrefix = opt?.selectedPrefix ?? selectedPrefix;
+  unselectedPrefix = opt?.unselectedPrefix ?? unselectedPrefix;
+
+  let selection = 0;
+  const header = opt?.headerText ?? "Search";
+  const placeHolder = opt?.placeholderText ?? "Filter...";
+  prompt = opt?.prompt ?? prompt;
+  let inputField = placeHolder;
+  const selectionBucket = new Set();
+
   return new Promise((resolve) => {
-    let selection = 0;
-    const header = opt?.headerText ?? "Search";
-    const placeHolder = opt?.placeholderText ?? "Filter...";
-    const prompt = opt?.prompt ?? '> ';
-    let inputField = placeHolder;
-    const selectionBucket = new Set();
 
     const filterListItems = (query) => {
       return list.filter(item => item.match(query))
@@ -90,7 +163,7 @@ const filterItemsFromList = (list, opt) => {
     }
 
     let items = filterListItems(opt?.value ?? '.*');
-    drawLayout(prompt, header, inputField, items)
+    drawLayout(header, inputField, items)
 
     const generateUpdatedItems = () => items.map((item, index) =>
       index === selection
@@ -102,21 +175,21 @@ const filterItemsFromList = (list, opt) => {
     const selectNext = () => {
       selection = (selection + 1) % items.length;
       items = generateUpdatedItems()
-      drawLayout(prompt, header, inputField, items)
+      drawLayout(header, inputField, items)
     };
 
     const selectPrev = () => {
       selection = (selection - 1 + items.length) % items.length;
       items = generateUpdatedItems()
-      drawLayout(prompt, header, inputField, items)
+      drawLayout(header, inputField, items)
     };
 
     const handleSubmit = (key, quit) => {
       quit();
       const selected = selectionBucket.size === 0
-        ? removeSelectionIndicator(removeUnselectionPrefix(removeSelectionPrefix(items[selection])))
+        ? [removeSelectionIndicator(removeUnselectionPrefix(removeSelectionPrefix(items[selection])))]
         : [...selectionBucket];
-      resolve(selected)
+      resolve(findItems(buildItemsList, selected))
     };
 
     const handleExit = (key, quit) => {
@@ -130,7 +203,7 @@ const filterItemsFromList = (list, opt) => {
       inputField += char;
       items = filterListItems(inputField);
       selection = 0;
-      drawLayout(prompt, header, inputField, items)
+      drawLayout(header, inputField, items)
     }
 
     const handleBackspace = () => {
@@ -142,7 +215,7 @@ const filterItemsFromList = (list, opt) => {
       }
       else items = filterListItems(inputField);
       selection = 0;
-      drawLayout(prompt, header, inputField, items)
+      drawLayout(header, inputField, items)
     }
 
     const markSelected = () => {
@@ -182,19 +255,36 @@ const filterItemsFromList = (list, opt) => {
   })
 }
 
-const chooseItemFromList = async (list, headerText, style) => await filterItemsFromList(list, headerText, '', style);
+const filterItemFromList = (listItems, opt) => filterItemsFromList(listItems, {
+  ...opt,
+  selectedPrefix: '',
+  unselectedPrefix: '',
+  limit: 1,
+})
+
+const chooseItemFromList = async (list, opt) => await filterItemFromList(list, {
+  ...opt,
+  headerText: '',
+  placeholderText: '',
+});
+
+const chooseItemsFromList = async (list, opt) => await filterItemsFromList(list, {
+  ...opt,
+  headerText: '',
+  placeholderText: ''
+})
 
 
-const list = ['option a', 'option b', 'option c', 'option d', 'option e', 'option f', 'option shubham', 'option singh', 'apple', 'cider', 'vinegar', 'jasmin', 'yasmin', 'chocolate', 'tailsman', 'chest', 'tresure', 'wonderous', 'conundrum', 'aphoshtate'];
-const options = {
-  headerText: 'Filter',
-  placeholderText: 'Type to search...',
-  value: '.*'
-}
-const selected = await filterItemsFromList(list, options).catch(err => print(err))
-//const selected = await chooseItemFromList(['option a', 'option b', 'option c', 'option d', 'option e', 'option f', 'option shubham', 'option singh'], 'Choose one')
-console.log('Retured from filter: ', selected, selected.length, '\n first: ', selected[0], '\n last:', selected[selected.length - 1])
-
-console.log(log.join('\n'))
+// const list = ['option a', 'option b', 'option c', 'option d', 'option e', 'option f', 'option shubham', 'option singh', 'apple', 'cider', 'vinegar', 'jasmin', 'yasmin', 'chocolate', 'tailsman', 'chest', 'tresure', 'wonderous', 'conundrum', 'aphoshtate'];
+// const options = {
+//   headerText: 'Filter',
+//   placeholderText: 'Type to search...',
+//   value: '.*'
+// }
+//const selected = await filterItemFromList(list, options).catch(err => print(err))
+// const selected = await chooseItemsFromList(list, options)
+// console.log('Retured from filter: ', JSON.stringify(selected))
+//
+// console.log(log.join('\n'))
 
 export { filterItemsFromList, chooseItemFromList }
