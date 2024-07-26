@@ -129,6 +129,7 @@ const filterItemsFromList = (list, opt) => {
       if (inputField === placeHolder) inputField = '';
       inputField += char;
       items = filterListItems(inputField);
+      selection = 0;
       drawLayout(prompt, header, inputField, items)
     }
 
@@ -140,6 +141,7 @@ const filterItemsFromList = (list, opt) => {
         items = filterListItems('.*')
       }
       else items = filterListItems(inputField);
+      selection = 0;
       drawLayout(prompt, header, inputField, items)
     }
 
@@ -183,7 +185,7 @@ const filterItemsFromList = (list, opt) => {
 const chooseItemFromList = async (list, headerText, style) => await filterItemsFromList(list, headerText, '', style);
 
 
-const list = ['option a', 'option b', 'option c', 'option d', 'option e', 'option f', 'option shubham', 'option singh'];
+const list = ['option a', 'option b', 'option c', 'option d', 'option e', 'option f', 'option shubham', 'option singh', 'apple', 'cider', 'vinegar', 'jasmin', 'yasmin', 'chocolate', 'tailsman', 'chest', 'tresure', 'wonderous', 'conundrum', 'aphoshtate'];
 const options = {
   headerText: 'Filter',
   placeholderText: 'Type to search...',
