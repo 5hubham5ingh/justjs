@@ -1,7 +1,4 @@
 import { cursorUp, cursorLeft, cursorNextLine, scrollDown, eraseScreen, clearTerminal, cursorTo, clearScreen, scrollUp } from './helpers/cursor.js';
-import { ansi } from './helpers/ansiStyle.js'
-import { ttySetRaw } from 'os'
-import { exit, in as stdin, out as stdout } from 'std'
 import { handleKeysPress, keySequences } from './helpers/terminal.js';
 
 const log = [];

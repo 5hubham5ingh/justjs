@@ -227,6 +227,17 @@ ansi.format = function(str, styleArray) {
     : str
 };
 
+ansi.stripStyle = ({ text, onlyFirst = false } = {}) => {
+  const pattern = [
+    '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
+    '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))'
+  ].join('|');
+
+  const regEx = new RegExp(pattern, onlyFirst ? undefined : 'g');
+
+  return typeof text === 'string' ? string.replace(regEx, '') : string;
+};
+
 /**
  * cursor-related sequences
  */
@@ -317,5 +328,4 @@ ansi.erase = {
    */
   inLine: function(n) { return csi + (n || 0) + 'K' }
 };
-
 export { ansi };
