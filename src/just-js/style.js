@@ -43,10 +43,78 @@ export const Align = {
   TOP: 'top',
 };
 
+const addBorder = (type, text) => {
+  let borderX, borderY, cornerUpperRight, cornerUpperLeft, cornerLowerRight, cornerLowerLeft;
+  switch (type) {
+    case Border.THICK:
+      borderX = '━';
+      borderY = '┃'
+      cornerUpperRight = '┓'
+      cornerLowerRight = '┛';
+      cornerUpperLeft = '┏';
+      cornerLowerLeft = '┗'
+      break;
+
+    case Border.DOUBLE:
+      borderX = '═';
+      borderY = '║';
+      cornerUpperRight = '╗';
+      cornerLowerRight = '╝'
+      cornerUpperLeft = '╔';
+      cornerLowerLeft = '╚';
+      break;
+
+    case Border.NORMAL:
+      borderX = '─';
+      borderY = '│';
+      cornerUpperRight = '┐';
+      cornerLowerRight = '┘';
+      cornerUpperLeft = '┌';
+      cornerLowerLeft = '└'
+      break;
+
+    case Border.ROUNDED:
+      borderX = '─';
+      borderY = '│';
+      cornerUpperRight = '╮';
+      cornerLowerRight = '╯';
+      cornerUpperLeft = '╭';
+      cornerLowerLeft = '╰';
+      break;
+
+    case Border.HIDDEN:
+      borderX = ' ';
+      borderY = ' ';
+      cornerUpperRight = ' ';
+      cornerLowerRight = ' ';
+      cornerUpperLeft = ' ';
+      cornerLowerLeft = ' ';
+      break;
+    default: return text;
+  }
+
+  const lines = text.split('\n');
+  const noOfLines = lines.length;
+  const lineLength = lines[0].length;
+  const firstLine = cornerUpperLeft + borderX.repeat(lineLength) + cornerUpperRight + '\n';
+  const lastLine = cornerLowerLeft + borderX.repeat(lineLength) + cornerLowerRight;
+
+  const borderedText = [];
+  borderedText.push(firstLine);
+  for (let line in lines) {
+    const borderedLine = `${borderY}${lines[line]}${borderY}\n`;
+    borderedText.push(borderedLine);
+  }
+  borderedText.push(lastLine);
+
+  return borderedText.join('');
+
+}
+
+const getLineLength = text => text.split('\n').reduce((length, line) => line.length > length ? line.length : length, 0);
+
 const DEFAULT_STYLE = {
-  height: 1,
   align: Align.LEFT,
-  width: 0,
   marginTop: 0,
   marginLeft: 0,
   marginBottom: 0,
@@ -97,22 +165,24 @@ const DEFAULT_STYLE = {
 const style = (text, opt) => {
 
   const currStyle = { ...DEFAULT_STYLE, ...opt };
-  if (currStyle.height < 1) currStyle.height = 1;
+  if (currStyle.height < 1) currStyle.height = text.split('\n').length;
+  if (currStyle.width < getLineLength(text)) currStyle.width = getLineLength(text)
+  print(currStyle.height, currStyle.width, text.split('\n')[0].length)
   let currText;
 
   switch (currStyle.align) {
     case Align.LEFT:
-      currText = text.padEnd(currStyle.width, ' ') // align left
+      currText = text.split('\n').map(line => line.padEnd(currStyle.width, ' ')).join('\n')// align left
       currText = currText.concat(`\n${' '.repeat(currText.length)}`.repeat(currStyle.height - 1)); // add blank lines below the text
       break;
     case Align.RIGHT:
-      currText = text.padStart(currStyle.width, ' ') // align right
+      currText = text.split('\n').map(line => line.padStart(currStyle.width, ' ')).join('\n') // align right
       currText = currText.concat(`${' '.repeat(currText.length)}\n`.repeat(currStyle.height - 1)); // add blank lines above the text
       break;
     case Align.CENTER:
-      const hGap = Math.floor((currStyle.width - text.length) / 2);
-      currText = (' '.repeat(hGap).concat(text)).concat(' '.repeat(hGap)) // add blank spaces left and right of the text
-      currText = currText.concat(`\n${' '.repeat(currText.length)}`.repeat(currStyle.height - 1)); // add blank lines below the text
+      const hGap = Math.floor((currStyle.width - text.split('\n').reduce((length, line) => line.length > length ? line.length : length, 0)) / 2);
+      currText = text.split('\n').map(line => ' '.repeat(hGap).concat(line).concat(' '.repeat(hGap))).join('\n')  // add blank spaces left and right of the text
+      currText = currText.concat(`\n${' '.repeat(getLineLength(currText))}`.repeat(currStyle.height - 1)); // add blank lines below the text
       break;
     case Align.BOTTOM:
       currText = text.padEnd(currStyle.width, ' ') // align left
@@ -129,10 +199,12 @@ const style = (text, opt) => {
       currText = currText.concat(`\n${' '.repeat(currText.length)}`.repeat(currStyle.height - 1)); // add blank lines below
       break;
   }
-  if (currStyle.paddingLeft) currText = ' '.repeat(currStyle.paddingLeft).concat(currText);
-  if (currStyle.paddingRight) currText = currText.concat(' '.repeat(currStyle.paddingRight));
-  if (currStyle.paddingTop) currText = `${' '.repeat(currStyle.width)}\n`.repeat(currStyle.paddingTop).concat(currText);
+  if (currStyle.paddingLeft) currText = currText.split('\n').map(line => ' '.repeat(currStyle.paddingLeft).concat(line)).join('\n');
+  if (currStyle.paddingRight) currText = currText.split('\n').map(line => line.concat(' '.repeat(currStyle.paddingRight))).join('\n');
+  if (currStyle.paddingTop) currText = `${' '.repeat(getLineLength(currText))}\n`.repeat(currStyle.paddingTop).concat(currText);
   if (currStyle.paddingBottom) currText = currText.concat(`\n${' '.repeat(currStyle.width)}`.repeat(currStyle.paddingBottom));
+
+  return addBorder(Border.DOUBLE, currText)
   return currText;
 }
 
@@ -141,14 +213,14 @@ const multiLineText = `┏┳  •  ┏  ┏
 ┗┛  ┗  ┛  ┛  ┗┫
               ┛`
 
-const styledTest = style(multiLineText, {
-  paddingBottom: 0,
-  paddingTop: 0,
-  paddingRight: 0,
-  paddingLeft: 0,
-  width: 158,
-  height: 1,
-  align: Align.BOTTOM
+const styledTest = style('shubham\nsingh', {
+  paddingBottom: 2,
+  paddingTop: 2,
+  paddingRight: 2,
+  paddingLeft: 2,
+  width: 10,
+  height: 3,
+  align: Align.LEFT
 })
 
 //print('lines: ', styledTest.split('\n').length, 'width: ', styledTest.split('\n')[5].length)
