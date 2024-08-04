@@ -1,6 +1,12 @@
 import { ttySetRaw } from 'os'
 import { in as stdin } from 'std'
 
+/**
+ * Used for key mapping in keysPressHandler function
+ *
+ * @readonly
+ * @enum {string}
+ */
 const keySequences = {
   // Arrow keys
   'ArrowUp': '\x1b[A',
