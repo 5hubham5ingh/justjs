@@ -133,7 +133,7 @@ ansi.style = {
  * > ansi.rgb(120, 0, 120)
  * '\u001b[38;2;120;0;120m'
  */
-ansi.rgb = function(r, g, b) {
+ansi.rgb = function (r, g, b) {
   return `\x1b[38;2;${r};${g};${b}m`
 };
 
@@ -147,9 +147,62 @@ ansi.rgb = function(r, g, b) {
  * > ansi.bgRgb(120, 0, 120)
  * '\u001b[48;2;120;0;120m'
  */
-ansi.bgRgb = function(r, g, b) {
+ansi.bgRgb = function (r, g, b) {
   return `\x1b[48;2;${r};${g};${b}m`
 };
+
+
+/**
+ * Returns RGB colour codes from Hexadecimal colour code
+ * @param {string} hex - Hexadecimal colour code.
+ * @returns {number[]}
+ * @example
+ * > ansi.hexToRgb('#32a852')
+ * [50, 168, 81]
+ */
+ansi.hexToRgb = function (hex) {
+  hex = hex.replace(/^#/, '');
+
+  if (hex.length === 4) {
+    hex = hex.split('').map(function (hex) {
+      return hex + hex;
+    }).join('');
+  }
+
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  return ansi.rgb(r, g, b);
+}
+
+
+/**
+ * Returns a 24-bit "true colour" foreground colour escape sequence.
+ * @param {string} hex - Hexadecimal colour code.
+ * @returns {number[]}
+ * @example
+ * > ansi.hex('#32a852')
+ *'\u001b[48;2;120;0;120m'
+ */
+ansi.hex = function (hex) {
+  const [r, g, b] = ansi.hexToRgb(hex)
+  return ansi.rgb(r, g, b)
+}
+
+
+/**
+ * Returns a 24-bit "true colour" background colour escape sequence.
+ * @param {string} hex - Hexadecimal colour code.
+ * @returns {number[]}
+ * @example
+ * > ansi.bgHex('#32a852')
+ *'\u001b[48;2;120;0;120m'
+ */
+ansi.bgHex = function (hex) {
+  const [r, g, b] = ansi.hexToRgb(hex);
+  return ansi.bgRgb(r, g, b);
+}
 
 /**
  * Returns an ansi sequence setting one or more styles.
@@ -165,10 +218,10 @@ ansi.bgRgb = function(r, g, b) {
  * > ansi.styles([ 'bg-red', 'rgb(200,200,200)' ])
  * '\u001b[41m\u001b[38;2;200;200;200m'
  */
-ansi.styles = function(styles) {
+ansi.styles = function (styles) {
   styles = arrayify(styles);
   return styles
-    .map(function(effect) {
+    .map(function (effect) {
       const rgbMatches = effect.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
       const bgRgbMatches = effect.match(/bg-rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
       if (bgRgbMatches) {
@@ -210,7 +263,7 @@ ansi.styles = function(styles) {
  * > ansi.format('Inline styling: [bg-rgb(255,128,0) bold]{something}')
  * 'Inline styling: \u001b[48;2;255;128;0m\u001b[1msomething\u001b[0m'
  */
-ansi.format = function(str, styleArray) {
+ansi.format = function (str, styleArray) {
   const re = /\[([\w\s-\(\),]+)\]{([^]*?)}/;
   let matches;
   str = String(str);
@@ -247,49 +300,49 @@ ansi.cursor = {
    * @param [lines=1] {number}
    * @return {string}
    */
-  up: function(lines) { return csi + (lines || 1) + 'A' },
+  up: function (lines) { return csi + (lines || 1) + 'A' },
 
   /**
    * Moves the cursor `lines` cells down. If the cursor is already at the edge of the screen, this has no effect
    * @param [lines=1] {number}
    * @return {string}
    */
-  down: function(lines) { return csi + (lines || 1) + 'B' },
+  down: function (lines) { return csi + (lines || 1) + 'B' },
 
   /**
    * Moves the cursor `lines` cells forward. If the cursor is already at the edge of the screen, this has no effect
    * @param [lines=1] {number}
    * @return {string}
    */
-  forward: function(lines) { return csi + (lines || 1) + 'C' },
+  forward: function (lines) { return csi + (lines || 1) + 'C' },
 
   /**
    * Moves the cursor `lines` cells back. If the cursor is already at the edge of the screen, this has no effect
    * @param [lines=1] {number}
    * @return {string}
    */
-  back: function(lines) { return csi + (lines || 1) + 'D' },
+  back: function (lines) { return csi + (lines || 1) + 'D' },
 
   /**
    * Moves cursor to beginning of the line n lines down.
    * @param [lines=1] {number}
    * @return {string}
    */
-  nextLine: function(lines) { return csi + (lines || 1) + 'E' },
+  nextLine: function (lines) { return csi + (lines || 1) + 'E' },
 
   /**
    * Moves cursor to beginning of the line n lines up.
    * @param [lines=1] {number}
    * @return {string}
    */
-  previousLine: function(lines) { return csi + (lines || 1) + 'F' },
+  previousLine: function (lines) { return csi + (lines || 1) + 'F' },
 
   /**
    * Moves the cursor to column n.
    * @param n {number} - column number
    * @return {string}
    */
-  horizontalAbsolute: function(n) { return csi + n + 'G' },
+  horizontalAbsolute: function (n) { return csi + n + 'G' },
 
   /**
    * Moves the cursor to row n, column m. The values are 1-based, and default to 1 (top left corner) if omitted.
@@ -297,7 +350,7 @@ ansi.cursor = {
    * @param m {number} - column number
    * @return {string}
    */
-  position: function(n, m) { return csi + (n || 1) + ';' + (m || 1) + 'H' },
+  position: function (n, m) { return csi + (n || 1) + ';' + (m || 1) + 'H' },
 
   /**
    * Hides the cursor
@@ -319,13 +372,13 @@ ansi.erase = {
    * @param n {number}
    * @return {string}
    */
-  display: function(n) { return csi + (n || 0) + 'J' },
+  display: function (n) { return csi + (n || 0) + 'J' },
 
   /**
    * Erases part of the line. If n is zero (or missing), clear from cursor to the end of the line. If n is one, clear from cursor to beginning of the line. If n is two, clear entire line. Cursor position does not change.
    * @param n {number}
    * @return {string}
    */
-  inLine: function(n) { return csi + (n || 0) + 'K' }
+  inLine: function (n) { return csi + (n || 0) + 'K' }
 };
 export { ansi };
