@@ -108,10 +108,20 @@ const addBorder = (type, text) => {
   borderedText.push(lastLine);
 
   return borderedText.join('');
-
 }
 
+
 const getLineLength = text => text.split('\n').reduce((length, line) => line.length > length ? line.length : length, 0);
+
+const addMargin = (text, left = 0, right = 0, bottom = 0, up = 0) => {
+  const xPaddedText = text.split('\n').map(line => ' '.repeat(left).concat(line).concat(' '.repeat(right))).join('\n')
+  const length = getLineLength(xPaddedText);
+  const xyPaddedText = `${' '.repeat(length)}\n`.repeat(up).concat(xPaddedText).concat(
+    `\n${' '.repeat(length)}`.repeat(bottom)
+  );
+  return xyPaddedText;
+}
+
 
 const DEFAULT_STYLE = {
   align: Align.LEFT,
@@ -205,7 +215,10 @@ const style = (text, opt) => {
   if (currStyle.paddingTop) currText = `${' '.repeat(getLineLength(currText))}\n`.repeat(currStyle.paddingTop).concat(currText);
   if (currStyle.paddingBottom) currText = currText.concat(`\n${' '.repeat(getLineLength(currText))}`.repeat(currStyle.paddingBottom));
 
-  return addBorder(Border.DOUBLE, currText)
+  if (opt.border)
+    currText = addBorder(opt.border, currText);
+  return addMargin(currText, opt.marginLeft, opt.marginRight, opt.marginBottom, opt.marginTop);
+
 }
 
 const multiLineText = `┏┳  •  ┏  ┏    
@@ -213,7 +226,7 @@ const multiLineText = `┏┳  •  ┏  ┏
 ┗┛  ┗  ┛  ┛  ┗┫
               ┛`
 const ddName = `shubham
-singh`
+singh  `
 const styledTest = style(ddName, {
   paddingBottom: 0,
   paddingTop: 0,
@@ -221,7 +234,11 @@ const styledTest = style(ddName, {
   paddingLeft: 0,
   width: 30,
   height: 0,
-  align: Align.CENTER
+  align: Align.CENTER,
+  border: Border.ROUNDED,
+  marginTop: 3,
+  marginBottom: 1,
+  marginLeft: 1
 })
 
 //print('lines: ', styledTest.split('\n').length, 'width: ', styledTest.split('\n')[5].length)
