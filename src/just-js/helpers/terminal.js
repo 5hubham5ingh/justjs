@@ -114,7 +114,7 @@ const mapNumberkeys = (keysAndCb) => {
  * - The Escape key is treated specially: pressing it twice will terminate the key press handler if no specific Escape handler is provided.
  * - For other keys, their corresponding handler functions are called when the key sequence is matched.
  */
-const handleKeysPress = (keysAndCb) => {
+const handleKeysPress = async (keysAndCb) => {
   let exit = false;
   const quit = () => exit = true;
   let escapeSequence = '';
@@ -130,12 +130,12 @@ const handleKeysPress = (keysAndCb) => {
 
     if (escapeSequence === keySequences.Escape) {
       const nextChar = stdin.readAsString(1);
-      if (nextChar === keySequences.Escape) keys.includes(keySequences.Escape) ? keysAndCb[keySequences.Escape](escapeSequence, quit) : quit();
+      if (nextChar === keySequences.Escape) keys.includes(keySequences.Escape) ? await keysAndCb[keySequences.Escape](escapeSequence, quit) : quit();
       else escapeSequence += nextChar;
       continue;
     }
 
-    if (keys.includes(escapeSequence)) { keysAndCb[escapeSequence](escapeSequence, quit); escapeSequence = '' }
+    if (keys.includes(escapeSequence)) { await keysAndCb[escapeSequence](escapeSequence, quit); escapeSequence = '' }
     escapeSequence = '';
   }
 }
