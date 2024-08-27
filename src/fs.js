@@ -69,9 +69,6 @@ const ensureDir = dir => {
   switch (dir[0]) {
     case '~': directory = getenv('HOME')?.concat(dir.slice(1)); break;
     case '/': directory = dir; break;
-    // case '.': const cwd = getcwd();
-    //   if (cwd[1] !== 0) throw new Error('Failed to read current working directory');
-    //   directory = cwd[0].concat(dir.slice(1)); break;
     default: const path = realpath(dir);
       if (path[1] !== 0) throw new Error('Failed to read directory');
       directory = path[0];
@@ -80,7 +77,6 @@ const ensureDir = dir => {
   directory.split('/').forEach((dir, i, path) => {
     if (!dir) return;
     const currPath = path.filter((_, j) => j <= i).join('/');
-    print(currPath)
     const dirStat = dirStats(currPath)[0];
     if (!dirStat) mkdir(currPath);
   });
