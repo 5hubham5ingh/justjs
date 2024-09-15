@@ -1,17 +1,17 @@
 /** @format */
 // @ts-check
-'use strict;';
+"use strict;";
 
 /*
   Simple wrappers around curl binary
  */
 
-import { Process } from './process.js';
+import { Process } from "./process.js";
 
 // @ts-ignore
-import * as os from 'os';
+import * as os from "os";
 // @ts-ignore
-import * as std from 'std';
+import * as std from "std";
 
 // in case of timeout, curl process will exit with this error code
 const CURL_ERR_TIMEOUT = 28;
@@ -130,41 +130,41 @@ class Curl {
     // curl arguments
     /** @private */
     this._curlArgs = [
-      'curl',
-      '-D',
-      '/dev/stderr',
+      "curl",
+      "-D",
+      "/dev/stderr",
       // ignore .curlrc
-      '-q',
+      "-q",
     ];
 
     // user agent
     if (undefined !== opt.userAgent) {
       const value = opt.userAgent.trim();
-      if ('' != value) {
-        this._curlArgs.push('-A');
+      if ("" != value) {
+        this._curlArgs.push("-A");
         this._curlArgs.push(value);
       }
     }
 
     // whether or not SSL errors should be ignored
     if (true === opt.insecure) {
-      this._curlArgs.push('-k');
+      this._curlArgs.push("-k");
     }
 
     // extra headers
     let contentType;
-    if (undefined !== opt.headers && 'object' == typeof opt.headers) {
+    if (undefined !== opt.headers && "object" == typeof opt.headers) {
       for (const [key, value] of Object.entries(opt.headers)) {
         const headerName = key.toLowerCase();
         const values = Array.isArray(value) ? value : [value];
         for (const v of values) {
-          this._curlArgs.push('-H');
+          this._curlArgs.push("-H");
           const header = `${key}: ${v}`;
           this._curlArgs.push(header);
           // only handle the first one
-          if ('content-type' == headerName) {
+          if ("content-type" == headerName) {
             // in case we have '; charset...'
-            const arr = v.trim().split(';');
+            const arr = v.trim().split(";");
             contentType = arr[0].trim();
             break;
           }
@@ -173,52 +173,51 @@ class Curl {
     }
 
     // cookies
-    if (undefined !== opt.cookies && 'object' == typeof opt.cookies) {
+    if (undefined !== opt.cookies && "object" == typeof opt.cookies) {
       const arr = [];
       for (const [key, value] of Object.entries(opt.cookies)) {
-        if ('string' == typeof value) {
+        if ("string" == typeof value) {
           arr.push(`${key}=${value}`);
         } else if (undefined !== value.value) {
           arr.push(`${key}=${value.value}`);
         }
       }
       if (0 != arr.length) {
-        const header = `Cookie: ${arr.join('; ')}`;
-        this._curlArgs.push('-H');
+        const header = `Cookie: ${arr.join("; ")}`;
+        this._curlArgs.push("-H");
         this._curlArgs.push(header);
       }
     }
 
     // http method
     /** @private */
-    this._method = 'GET';
+    this._method = "GET";
     if (undefined !== opt.method) {
       const method = opt.method.toUpperCase();
       switch (method) {
-        case 'GET':
-        case 'POST':
-        case 'DELETE':
-        case 'PUT':
-        case 'OPTIONS':
-        case 'HEAD':
-        case 'PATCH':
+        case "GET":
+        case "POST":
+        case "DELETE":
+        case "PUT":
+        case "OPTIONS":
+        case "HEAD":
+        case "PATCH":
           this._method = method;
           break;
       }
     }
-    this._curlArgs.push('-X');
+    this._curlArgs.push("-X");
     this._curlArgs.push(this._method);
 
     // follow redirects
     if (false !== opt.followRedirects) {
-      this._curlArgs.push('-L');
+      this._curlArgs.push("-L");
       if (undefined !== opt.maxRedirects) {
-        const value =
-          typeof opt.maxRedirects === 'number'
-            ? opt.maxRedirects
-            : parseInt(opt.maxRedirects);
+        const value = typeof opt.maxRedirects === "number"
+          ? opt.maxRedirects
+          : parseInt(opt.maxRedirects);
         if (!isNaN(value) && value > 0) {
-          this._curlArgs.push('--max-redirs');
+          this._curlArgs.push("--max-redirs");
           this._curlArgs.push(`${value}`);
         }
       }
@@ -247,9 +246,9 @@ class Curl {
       this._stdout = opt.stdout;
     } else if (undefined !== opt.outputFile) {
       // we only have filepath
-      if ('string' == typeof opt.outputFile) {
+      if ("string" == typeof opt.outputFile) {
         const value = opt.outputFile.trim();
-        if ('' != value) {
+        if ("" != value) {
           this._outputFile = {
             filepath: value,
             conditionalOutput: false,
@@ -259,7 +258,7 @@ class Curl {
       } else {
         if (undefined !== opt.outputFile.filepath) {
           const value = opt.outputFile.filepath.trim();
-          if ('' != value) {
+          if ("" != value) {
             this._outputFile = {
               filepath: value,
               conditionalOutput: true === opt.outputFile.conditionalOutput,
@@ -269,7 +268,7 @@ class Curl {
             if (this._outputFile.conditionalOutput) {
               if (
                 undefined !== opt.outputFile.onCheckCondition &&
-                'function' == typeof opt.outputFile.onCheckCondition
+                "function" == typeof opt.outputFile.onCheckCondition
               ) {
                 this._outputFile.onCheckCondition =
                   opt.outputFile.onCheckCondition;
@@ -279,29 +278,29 @@ class Curl {
         }
       }
       if (!this._outputFile.conditionalOutput) {
-        this._curlArgs.push('-o');
+        this._curlArgs.push("-o");
         this._curlArgs.push(this._outputFile.filepath);
       }
     }
 
     // connect timeout
     if (undefined !== opt.connectTimeout) {
-      const value =
-        typeof opt.connectTimeout === 'number'
-          ? opt.connectTimeout
-          : parseInt(opt.connectTimeout);
+      const value = typeof opt.connectTimeout === "number"
+        ? opt.connectTimeout
+        : parseInt(opt.connectTimeout);
       if (!isNaN(value) && value > 0) {
-        this._curlArgs.push('--connect-timeout');
+        this._curlArgs.push("--connect-timeout");
         this._curlArgs.push(`${value}`);
       }
     }
 
     // overall timeout
     if (undefined !== opt.maxTime) {
-      const value =
-        typeof opt.maxTime === 'number' ? opt.maxTime : parseInt(opt.maxTime);
+      const value = typeof opt.maxTime === "number"
+        ? opt.maxTime
+        : parseInt(opt.maxTime);
       if (!isNaN(value) && value > 0) {
-        this._curlArgs.push('--max-time');
+        this._curlArgs.push("--max-time");
         this._curlArgs.push(`${value}`);
       }
     }
@@ -312,25 +311,23 @@ class Curl {
         undefined !== opt.basicAuth.username &&
         undefined !== opt.basicAuth.password
       ) {
-        this._curlArgs.push('-u');
+        this._curlArgs.push("-u");
         const str = `${opt.basicAuth.username}:${opt.basicAuth.password}`;
         this._curlArgs.push(str);
       }
-    }
-    // bearer token
+    } // bearer token
     else if (undefined !== opt.bearerToken) {
-      this._curlArgs.push('-H');
+      this._curlArgs.push("-H");
       const header = `Authorization: Bearer ${opt.bearerToken}`;
       this._curlArgs.push(header);
-    }
-    // JWT token
+    } // JWT token
     else if (undefined !== opt.jwt) {
       let token = opt.jwt;
       // add prefix if needed
-      if (!token.startsWith('JWT ')) {
+      if (!token.startsWith("JWT ")) {
         token = `JWT ${token}`;
       }
-      this._curlArgs.push('-H');
+      this._curlArgs.push("-H");
       const header = `Authorization: ${token}`;
       this._curlArgs.push(header);
     }
@@ -339,110 +336,108 @@ class Curl {
       Only allow data/body for PUT, POST, DELETE, PATCH
      */
     if (
-      'PUT' == this._method ||
-      'POST' == this._method ||
-      'DELETE' == this._method ||
-      'PATCH' == this._method
+      "PUT" == this._method ||
+      "POST" == this._method ||
+      "DELETE" == this._method ||
+      "PATCH" == this._method
     ) {
       // form-urlencoded
-      if (undefined !== opt.data && 'object' == typeof opt.data) {
-        if ('application/x-www-form-urlencoded' != contentType) {
-          this._curlArgs.push('-H');
+      if (undefined !== opt.data && "object" == typeof opt.data) {
+        if ("application/x-www-form-urlencoded" != contentType) {
+          this._curlArgs.push("-H");
           this._curlArgs.push(
-            `Content-Type: application/x-www-form-urlencoded`
+            `Content-Type: application/x-www-form-urlencoded`,
           );
         }
         for (const [key, value] of Object.entries(opt.data)) {
           if (Array.isArray(value)) {
             for (let i = 0; i < value.length; ++i) {
-              this._curlArgs.push('-d');
+              this._curlArgs.push("-d");
               const pair = `${key}[]=${encodeURIComponent(value[i])}`;
               this._curlArgs.push(pair);
             }
           } else {
-            this._curlArgs.push('-d');
+            this._curlArgs.push("-d");
             const pair = `${key}=${encodeURIComponent(value)}`;
             this._curlArgs.push(pair);
           }
         }
-      }
-      // json body
+      } // json body
       else if (undefined !== opt.json) {
         /** @type {string|undefined} */
         let json;
-        if ('object' == typeof opt.json) {
+        if ("object" == typeof opt.json) {
           json = JSON.stringify(opt.json);
-        } else if ('string' == typeof opt.json) {
+        } else if ("string" == typeof opt.json) {
           json = opt.json;
         }
         if (undefined !== json || true === opt.json) {
-          if ('application/json' != contentType) {
-            this._curlArgs.push('-H');
+          if ("application/json" != contentType) {
+            this._curlArgs.push("-H");
             this._curlArgs.push(`Content-Type: application/json`);
           }
           if (true !== opt.json) {
-            this._curlArgs.push('-d');
+            this._curlArgs.push("-d");
             // no need to escape anything since we're using exec
             // @ts-ignore
             this._curlArgs.push(json);
           }
         }
-      }
-      // json body from json file
+      } // json body from json file
       else if (undefined !== opt.jsonFile) {
-        if ('application/json' != contentType) {
-          this._curlArgs.push('-H');
+        if ("application/json" != contentType) {
+          this._curlArgs.push("-H");
           this._curlArgs.push(`Content-Type: application/json`);
         }
-        this._curlArgs.push('-d');
+        this._curlArgs.push("-d");
         this._curlArgs.push(`@${opt.jsonFile}`);
       } else if (undefined !== opt.file) {
         /*
           Content-Type will be set automatically to
           multipart/form-data by curl
          */
-        let name = 'file';
+        let name = "file";
         let filepath;
         let filename;
         let formData;
         let contentType;
         // single file path
-        if ('string' == typeof opt.file) {
+        if ("string" == typeof opt.file) {
           filepath = opt.file;
-        } else if ('object' == typeof opt.file) {
+        } else if ("object" == typeof opt.file) {
           if (
             undefined !== opt.file.filepath &&
-            'string' == typeof opt.file.filepath
+            "string" == typeof opt.file.filepath
           ) {
             filepath = opt.file.filepath;
             if (
               undefined !== opt.file.filename &&
-              'string' == typeof opt.file.filename
+              "string" == typeof opt.file.filename
             ) {
               filename = opt.file.filename;
             }
             if (
               undefined !== opt.file.name &&
-              'string' == typeof opt.file.name
+              "string" == typeof opt.file.name
             ) {
               name = opt.file.name;
             }
             if (
               undefined !== opt.file.formData &&
-              'object' == typeof opt.file.formData
+              "object" == typeof opt.file.formData
             ) {
               formData = opt.file.formData;
             }
             if (
               undefined !== opt.file.contentType &&
-              'string' == typeof opt.file.contentType
+              "string" == typeof opt.file.contentType
             ) {
               contentType = opt.file.contentType;
             }
           }
         }
         if (undefined !== filepath) {
-          this._curlArgs.push('-F');
+          this._curlArgs.push("-F");
           let arg = `${name}=@${filepath}`;
           if (undefined !== filename) {
             arg += `;filename=${filename}`;
@@ -454,29 +449,27 @@ class Curl {
           // extra forma data
           if (undefined !== formData) {
             for (const [key, value] of Object.entries(formData)) {
-              this._curlArgs.push('-F');
+              this._curlArgs.push("-F");
               this._curlArgs.push(`${key}=${value}`);
             }
           }
         }
-      }
-      // raw content
-      else if (undefined !== opt.body && 'string' == typeof opt.body) {
-        this._curlArgs.push('-d');
+      } // raw content
+      else if (undefined !== opt.body && "string" == typeof opt.body) {
+        this._curlArgs.push("-d");
         // no need to escape anything since we're using exec
         this._curlArgs.push(opt.body);
-      }
-      // raw content from file
+      } // raw content from file
       else if (undefined !== opt.bodyFile) {
         let filepath;
         let binary = false;
         // single file path
-        if ('string' == typeof opt.bodyFile) {
+        if ("string" == typeof opt.bodyFile) {
           filepath = opt.bodyFile;
-        } else if ('object' == typeof opt.bodyFile) {
+        } else if ("object" == typeof opt.bodyFile) {
           if (
             undefined !== opt.bodyFile.filepath &&
-            'string' == typeof opt.bodyFile.filepath
+            "string" == typeof opt.bodyFile.filepath
           ) {
             filepath = opt.bodyFile.filepath;
           }
@@ -486,9 +479,9 @@ class Curl {
         }
         if (undefined !== filepath) {
           if (!binary) {
-            this._curlArgs.push('-d');
+            this._curlArgs.push("-d");
           } else {
-            this._curlArgs.push('--data-binary');
+            this._curlArgs.push("--data-binary");
           }
         }
         this._curlArgs.push(`@${filepath}`);
@@ -497,30 +490,30 @@ class Curl {
     // url & query string
     let finalUrl = url;
     const useBracketsForParams = false !== opt.useBracketsForParams;
-    if (undefined !== opt.params && 'object' == typeof opt.params) {
-      let qs = '';
+    if (undefined !== opt.params && "object" == typeof opt.params) {
+      let qs = "";
       for (const [key, value] of Object.entries(opt.params)) {
         if (Array.isArray(value)) {
           for (let i = 0; i < value.length; ++i) {
-            if ('' != qs) {
-              qs += '&';
+            if ("" != qs) {
+              qs += "&";
             }
-            qs += `${key}${
-              useBracketsForParams ? '[]' : ''
-            }=${encodeURIComponent(value[i])}`;
+            qs += `${key}${useBracketsForParams ? "[]" : ""}=${
+              encodeURIComponent(value[i])
+            }`;
           }
         } else {
-          if ('' != qs) {
-            qs += '&';
+          if ("" != qs) {
+            qs += "&";
           }
           qs += `${key}=${encodeURIComponent(value)}`;
         }
       }
-      if ('' != qs) {
+      if ("" != qs) {
         finalUrl += `?${qs}`;
       }
     }
-    this._curlArgs.push('--url');
+    this._curlArgs.push("--url");
     this._curlArgs.push(finalUrl);
 
     // by default normalize response headers (convert to lowercase)
@@ -531,12 +524,12 @@ class Curl {
     }
     // by default ignore duplicate headers
     /** @private */
-    this._returnHeadersAs = 'string';
+    this._returnHeadersAs = "string";
     if (undefined !== opt.returnHeadersAs) {
       switch (opt.returnHeadersAs) {
-        case 'string':
-        case 'array':
-        case 'auto':
+        case "string":
+        case "array":
+        case "auto":
           this._returnHeadersAs = opt.returnHeadersAs;
       }
     }
@@ -639,16 +632,14 @@ class Curl {
     let conditionalOutputTmpFile = undefined;
     if (undefined !== this._stdout) {
       processOpt.stdout = this._stdout;
-    }
-    // output file
+    } // output file
     else if (undefined !== this._outputFile) {
       // in case of conditional output, pass a temporary file as stdout to process
       if (this._outputFile.conditionalOutput) {
         conditionalOutputTmpFile = std.tmpfile();
         processOpt.stdout = conditionalOutputTmpFile.fileno();
       }
-    }
-    // by default, disable streaming to improve performances
+    } // by default, disable streaming to improve performances
     else {
       processOpt.streamStdout = false;
     }
@@ -664,7 +655,7 @@ class Curl {
     if (0 != state.exitCode) {
       this._curlError = this._process.stderr.trim();
       // only keep curl error and ignore anything before it
-      const index = this._curlError.indexOf('curl:');
+      const index = this._curlError.indexOf("curl:");
       if (-1 != index) {
         this._curlError = this._curlError.substring(index);
       }
@@ -690,14 +681,14 @@ class Curl {
     const stderr = this._process.stderr.trim();
 
     // ignore all content until last "HTTP/" (ie: discard beginning of curl progress info and any informational status lines)
-    const lastHttpPos = stderr.lastIndexOf('HTTP/');
+    const lastHttpPos = stderr.lastIndexOf("HTTP/");
     if (-1 == lastHttpPos) {
       if (undefined !== conditionalOutputTmpFile) {
         conditionalOutputTmpFile.close();
       }
       throw new Error(`Missing status line`);
     }
-    const headers = stderr.substring(lastHttpPos).split('\r\n');
+    const headers = stderr.substring(lastHttpPos).split("\r\n");
 
     // remove last entry (end of curl progress info)
     headers.pop();
@@ -706,7 +697,7 @@ class Curl {
     // status line
     let statusLine;
     for (let i = 0; i < headers.length; ++i) {
-      if (headers[i].startsWith('HTTP/')) {
+      if (headers[i].startsWith("HTTP/")) {
         statusLine = headers[i];
       } else {
         nonStatusHeaders.push(headers[i]);
@@ -731,7 +722,7 @@ class Curl {
     const responseHeaders = {};
     const setCookieHeaders = [];
     nonStatusHeaders.forEach((headerLine, i) => {
-      const pos = headerLine.indexOf(':');
+      const pos = headerLine.indexOf(":");
       // invalid header
       if (-1 == pos) {
         return;
@@ -739,23 +730,22 @@ class Curl {
       let name = headerLine.substring(0, pos);
       const normalizedName = name.toLowerCase();
       const value = headerLine.substring(pos + 1).trim();
-      if ('content-type' == normalizedName) {
+      if ("content-type" == normalizedName) {
         // in case we have '; charset...'
-        const arr = value.split(';');
+        const arr = value.split(";");
         this._contentType = arr[0].toLowerCase();
-      } else if ('set-cookie' == normalizedName) {
+      } else if ("set-cookie" == normalizedName) {
         setCookieHeaders.push(value);
       }
       const headerName = this._normalizeHeaders ? normalizedName : name;
       // always return an array of values
-      if ('array' == this._returnHeadersAs) {
+      if ("array" == this._returnHeadersAs) {
         if (undefined === responseHeaders[headerName]) {
           responseHeaders[headerName] = [];
         }
         responseHeaders[headerName].push(value);
-      }
-      // return an array only if an header appears multiple time
-      else if ('auto' == this._returnHeadersAs) {
+      } // return an array only if an header appears multiple time
+      else if ("auto" == this._returnHeadersAs) {
         if (undefined !== responseHeaders[headerName]) {
           // convert to an array
           if (!Array.isArray(responseHeaders[headerName])) {
@@ -765,8 +755,7 @@ class Curl {
         } else {
           responseHeaders[headerName] = value;
         }
-      }
-      // only keep first value
+      } // only keep first value
       else {
         responseHeaders[headerName] = value;
       }
@@ -786,7 +775,7 @@ class Curl {
     if (undefined === this._stdout) {
       // if no output file was used, try to parse body
       if (undefined === this._outputFile) {
-        if ('application/json' == this._contentType && this._parseJson) {
+        if ("application/json" == this._contentType && this._parseJson) {
           try {
             const body = JSON.parse(this._body);
             this._body = body;
@@ -794,14 +783,13 @@ class Curl {
             // invalid JSON, do nothing, keep raw body
           }
         }
-      }
-      // check condition
+      } // check condition
       else if (undefined !== conditionalOutputTmpFile) {
         const canWrite = this._outputFile.onCheckCondition(this);
         if (canWrite) {
           /** @type {any} */
           let errObj;
-          const destFile = std.open(this._outputFile.filepath, 'wb', errObj);
+          const destFile = std.open(this._outputFile.filepath, "wb", errObj);
           if (null === destFile) {
             conditionalOutputTmpFile.close();
             throw new Error(`Could not open dest file (${errObj.errno})`);
@@ -810,11 +798,11 @@ class Curl {
           let size;
           while (
             0 !=
-            (size = conditionalOutputTmpFile.read(
-              buffer.buffer,
-              0,
-              CONDITIONAL_OUTPUT_BUFFER_SIZE
-            ))
+              (size = conditionalOutputTmpFile.read(
+                buffer.buffer,
+                0,
+                CONDITIONAL_OUTPUT_BUFFER_SIZE,
+              ))
           ) {
             destFile.write(buffer.buffer, 0, size);
           }
@@ -866,7 +854,7 @@ class Curl {
    * @returns {CurlStatus|undefined} {"code":integer, "text":string}
    */
   _getStatus(statusLine) {
-    const arr = statusLine.split(' ');
+    const arr = statusLine.split(" ");
     arr.shift();
     // @ts-ignore
     const statusCode = parseInt(arr.shift());
@@ -878,7 +866,7 @@ class Curl {
     if (0 == arr.length) {
       return undefined;
     }
-    const statusText = arr.join(' ');
+    const statusText = arr.join(" ");
     return {
       code: statusCode,
       text: statusText,
@@ -913,7 +901,7 @@ class Curl {
    * @returns {string}
    */
   get cmdline() {
-    return this._curlArgs.join(' ');
+    return this._curlArgs.join(" ");
   }
 
   /**
@@ -1261,7 +1249,7 @@ const curlRequest = async (url, opt) => {
   if (ignoreError) {
     let body = c.body;
     if (undefined === body) {
-      body = '';
+      body = "";
     }
     return body;
   }
@@ -1269,7 +1257,7 @@ const curlRequest = async (url, opt) => {
   if (c.curlFailed) {
     message = c.curlError;
   }
-  if ('object' == typeof message) {
+  if ("object" == typeof message) {
     message = JSON.stringify(message);
   }
   /** @type {any} */
@@ -1338,7 +1326,7 @@ const splitCookiesString = (cookiesString) => {
 
   const notSpecialChar = () => {
     ch = cookiesString.charAt(pos);
-    return ch !== '=' && ch !== ';' && ch !== ',';
+    return ch !== "=" && ch !== ";" && ch !== ",";
   };
 
   while (pos < cookiesString.length) {
@@ -1347,7 +1335,7 @@ const splitCookiesString = (cookiesString) => {
 
     while (skipWhitespace()) {
       ch = cookiesString.charAt(pos);
-      if (ch === ',') {
+      if (ch === ",") {
         // ',' is a cookie separator if we have later first '=', not ';' or ','
         lastComma = pos;
         pos += 1;
@@ -1360,7 +1348,7 @@ const splitCookiesString = (cookiesString) => {
         }
 
         // currently special character
-        if (pos < cookiesString.length && cookiesString.charAt(pos) === '=') {
+        if (pos < cookiesString.length && cookiesString.charAt(pos) === "=") {
           // we found cookies separator
           cookiesSeparatorFound = true;
           // pos is inside the next cookie, so back up and return it.
@@ -1395,15 +1383,15 @@ const splitCookiesString = (cookiesString) => {
  */
 const parseSetCookieHeader = (value) => {
   const parts = value
-    .split(';')
-    .filter((str) => 'string' == typeof str && !!str.trim());
+    .split(";")
+    .filter((str) => "string" == typeof str && !!str.trim());
   if (0 === parts.length) {
     return {};
   }
   // @ts-ignore
-  const nameValue = parts.shift().split('=');
+  const nameValue = parts.shift().split("=");
   const name = nameValue.shift();
-  let val = nameValue.join('='); // everything after the first =, joined by a "=" if there was more than one part
+  let val = nameValue.join("="); // everything after the first =, joined by a "=" if there was more than one part
 
   try {
     val = decodeURIComponent(val); // decode cookie value
@@ -1417,19 +1405,19 @@ const parseSetCookieHeader = (value) => {
   };
 
   parts.forEach((part) => {
-    const sides = part.split('=');
+    const sides = part.split("=");
     // @ts-ignore
     const key = sides.shift().trimStart().toLowerCase();
-    const value = sides.join('=');
-    if (key === 'expires') {
+    const value = sides.join("=");
+    if (key === "expires") {
       cookie.expires = new Date(value);
-    } else if (key === 'max-age') {
+    } else if (key === "max-age") {
       cookie.maxAge = parseInt(value, 10);
-    } else if (key === 'secure') {
+    } else if (key === "secure") {
       cookie.secure = true;
-    } else if (key === 'httponly') {
+    } else if (key === "httponly") {
       cookie.httpOnly = true;
-    } else if (key === 'samesite') {
+    } else if (key === "samesite") {
       cookie.sameSite = value;
     } else {
       cookie[key] = value;
@@ -1443,4 +1431,4 @@ const parseSetCookieHeader = (value) => {
   return cookie;
 };
 
-export { Curl, multiCurl, curlRequest };
+export { Curl, curlRequest, multiCurl };
