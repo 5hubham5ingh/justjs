@@ -33,9 +33,6 @@ globalThis.SystemError = class SystemError extends Error {
     this.name = name;
     this.description = description;
     this.body = body;
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, SystemError);
-    }
   }
 
   /**
@@ -52,7 +49,7 @@ globalThis.SystemError = class SystemError extends Error {
       ansi.style.reset,
       "\n",
       ansi.style.red,
-      this.description?.split(".").map((line) => line.trim()).join("\n"),
+      this.description?.split(";")?.map((line) => line.trim())?.join("\n"),
       ansi.style.reset,
       "\n",
       inspect ? this.body : "",

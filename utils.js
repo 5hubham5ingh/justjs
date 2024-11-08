@@ -61,7 +61,11 @@ export const notify = async (title, message = "", urgency = "normal") => {
     ];
     await execAsync(command)
       .catch((error) => {
-        throw new SystemError("Failed to send notification.", error);
+        throw new SystemError(
+          "Failed to send notification.",
+          error.message,
+          title + message,
+        );
       });
   }, "notify");
 };
