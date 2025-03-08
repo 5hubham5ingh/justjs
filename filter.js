@@ -1,5 +1,15 @@
-import { cursorUp, cursorLeft, cursorNextLine, scrollDown, eraseScreen, clearTerminal, cursorTo, clearScreen, scrollUp } from './helpers/cursor.js';
-import { handleKeysPress, keySequences } from './helpers/terminal.js';
+import {
+  clearScreen,
+  clearTerminal,
+  cursorLeft,
+  cursorNextLine,
+  cursorTo,
+  cursorUp,
+  eraseScreen,
+  scrollDown,
+  scrollUp,
+} from "./helpers/cursor.js";
+import { handleKeysPress, keySequences } from "./helpers/terminal.js";
 
 const log = [];
 
@@ -20,7 +30,7 @@ const buildItems = (list) => {
   /** @type {ListItem<T>[]} */
   const items = [];
   for (const item of list) {
-    if (typeof item === 'object') {
+    if (typeof item === "object") {
       items.push({ text: item.text, value: item.value });
     } else {
       /** @type {any} */
@@ -64,44 +74,44 @@ const findItems = (list, values) => {
   return items;
 };
 
-
-let indicator = '•';
+let indicator = "•";
 let selectedPrefix = " ◉ ";
 let unselectedPrefix = " ○ ";
-let prompt = '> ';
+let prompt = "> ";
 
 const drawLayout = (header, inputField, items) => {
-  const ui = `\n${header ? header + '\n' : ''}${inputField ? (prompt ?? '') + inputField + '\n' : ''}${items.join('\n')}`
-  print(clearScreen, cursorTo(0, 0), ui, scrollUp)
-}
+  const ui = `\n${header ? header + "\n" : ""}${
+    inputField ? (prompt ?? "") + inputField + "\n" : ""
+  }${items.join("\n")}`;
+  print(clearScreen, cursorTo(0, 0), ui, scrollUp);
+};
 
-const applySelectionIndicator = item => {
+const applySelectionIndicator = (item) => {
   if (item.includes(indicator)) return item;
   return item.padStart(item.length + indicator.length, indicator);
 };
 
-const removeSelectionIndicator = item => {
-  return item.replace(indicator, '')
+const removeSelectionIndicator = (item) => {
+  return item.replace(indicator, "");
 };
 
-const applySelectionPrefix = item => {
+const applySelectionPrefix = (item) => {
   if (item.includes(selectedPrefix)) return item;
-  return item.padStart(item.length + selectedPrefix.length, selectedPrefix)
+  return item.padStart(item.length + selectedPrefix.length, selectedPrefix);
 };
 
-const removeSelectionPrefix = item => {
-  return item.replace(selectedPrefix, '');
+const removeSelectionPrefix = (item) => {
+  return item.replace(selectedPrefix, "");
 };
 
-const applyUnselectionPrefix = item => {
+const applyUnselectionPrefix = (item) => {
   if (item.includes(unselectedPrefix)) return item;
-  return item.padStart(item.length + unselectedPrefix.length, unselectedPrefix)
+  return item.padStart(item.length + unselectedPrefix.length, unselectedPrefix);
 };
 
-const removeUnselectionPrefix = item => {
-  return item.replace(unselectedPrefix, '')
+const removeUnselectionPrefix = (item) => {
+  return item.replace(unselectedPrefix, "");
 };
-
 
 /**
  * Choose multiple items by filtering a list (press + and - to select and unselect an item respectively, Enter to confirm)
@@ -128,9 +138,8 @@ const removeUnselectionPrefix = item => {
  * @returns {ListItem<T>[]|null}
  */
 const filterItemsFromList = (listItems, opt) => {
-
   const buildItemsList = buildItems(listItems);
-  const list = buildItemsList.map(item => item.text);
+  const list = buildItemsList.map((item) => item.text);
 
   indicator = opt?.indicator ?? indicator;
   selectedPrefix = opt?.selectedPrefix ?? selectedPrefix;
@@ -144,9 +153,8 @@ const filterItemsFromList = (listItems, opt) => {
   const selectionBucket = new Set();
 
   return new Promise((resolve) => {
-
     const filterListItems = (query) => {
-      return list.filter(item => item.match(query))
+      return list.filter((item) => item.match(query))
         .map((filteredItem, index) => {
           filteredItem = selectionBucket.has(filteredItem)
             ? applySelectionPrefix(filteredItem)
@@ -155,38 +163,41 @@ const filterItemsFromList = (listItems, opt) => {
             ? applySelectionIndicator(filteredItem)
             : removeSelectionIndicator(filteredItem);
           return filteredItem;
-        }
-        );
-    }
+        });
+    };
 
-    let items = filterListItems(opt?.value ?? '.*');
-    drawLayout(header, inputField, items)
+    let items = filterListItems(opt?.value ?? ".*");
+    drawLayout(header, inputField, items);
 
-    const generateUpdatedItems = () => items.map((item, index) =>
-      index === selection
-        ? applySelectionIndicator(item)
-        : removeSelectionIndicator(item)
-    );
-
+    const generateUpdatedItems = () =>
+      items.map((item, index) =>
+        index === selection
+          ? applySelectionIndicator(item)
+          : removeSelectionIndicator(item)
+      );
 
     const selectNext = () => {
       selection = (selection + 1) % items.length;
-      items = generateUpdatedItems()
-      drawLayout(header, inputField, items)
+      items = generateUpdatedItems();
+      drawLayout(header, inputField, items);
     };
 
     const selectPrev = () => {
       selection = (selection - 1 + items.length) % items.length;
-      items = generateUpdatedItems()
-      drawLayout(header, inputField, items)
+      items = generateUpdatedItems();
+      drawLayout(header, inputField, items);
     };
 
     const handleSubmit = (key, quit) => {
       quit();
       const selected = selectionBucket.size === 0
-        ? [removeSelectionIndicator(removeUnselectionPrefix(removeSelectionPrefix(items[selection])))]
+        ? [
+          removeSelectionIndicator(
+            removeUnselectionPrefix(removeSelectionPrefix(items[selection])),
+          ),
+        ]
         : [...selectionBucket];
-      resolve(findItems(buildItemsList, selected))
+      resolve(findItems(buildItemsList, selected));
     };
 
     const handleExit = (key, quit) => {
@@ -196,43 +207,50 @@ const filterItemsFromList = (listItems, opt) => {
 
     const handleInput = (char) => {
       if (!placeHolder) return;
-      if (inputField === placeHolder) inputField = '';
+      if (inputField === placeHolder) inputField = "";
       inputField += char;
       items = filterListItems(inputField);
       selection = 0;
-      drawLayout(header, inputField, items)
-    }
+      drawLayout(header, inputField, items);
+    };
 
     const handleBackspace = () => {
       if (inputField === placeHolder) return;
-      inputField = inputField.slice(0, inputField.length - 1)
+      inputField = inputField.slice(0, inputField.length - 1);
       if (inputField.length === 0) {
         inputField = placeHolder;
-        items = filterListItems('.*')
-      }
-      else items = filterListItems(inputField);
+        items = filterListItems(".*");
+      } else items = filterListItems(inputField);
       selection = 0;
-      drawLayout(header, inputField, items)
-    }
+      drawLayout(header, inputField, items);
+    };
 
     const markSelected = () => {
       if (opt?.limit >= selectionBucket.size) return;
-      const currItem = removeSelectionIndicator(removeSelectionPrefix(removeUnselectionPrefix(items[selection])));
+      const currItem = removeSelectionIndicator(
+        removeSelectionPrefix(removeUnselectionPrefix(items[selection])),
+      );
       if (!selectionBucket.has(currItem)) {
         selectionBucket.add(currItem);
-        items[selection] = applySelectionPrefix(removeUnselectionPrefix(removeSelectionIndicator(items[selection])));
+        items[selection] = applySelectionPrefix(
+          removeUnselectionPrefix(removeSelectionIndicator(items[selection])),
+        );
         selectNext();
       }
-    }
+    };
 
     const markUnselected = () => {
-      const currItem = removeSelectionIndicator(removeUnselectionPrefix(removeSelectionPrefix(items[selection])));
+      const currItem = removeSelectionIndicator(
+        removeUnselectionPrefix(removeSelectionPrefix(items[selection])),
+      );
       if (selectionBucket.has(currItem)) {
-        selectionBucket.delete(currItem)
-        items[selection] = applyUnselectionPrefix(removeSelectionIndicator(removeSelectionPrefix(items[selection])));
+        selectionBucket.delete(currItem);
+        items[selection] = applyUnselectionPrefix(
+          removeSelectionIndicator(removeSelectionPrefix(items[selection])),
+        );
         selectNext();
       }
-    }
+    };
 
     const keyPressHandlers = {
       [keySequences.ArrowUp]: selectPrev,
@@ -244,33 +262,35 @@ const filterItemsFromList = (listItems, opt) => {
       [keySequences.Backspace]: handleBackspace,
       [keySequences.Tab]: selectNext,
       [keySequences.ShiftTab]: selectPrev,
-      '+': markSelected,
-      '-': markUnselected
-    }
+      "+": markSelected,
+      "-": markUnselected,
+    };
 
-    handleKeysPress(keyPressHandlers)
-  })
-}
+    handleKeysPress(keyPressHandlers);
+  });
+};
 
-const filterItemFromList = (listItems, opt) => filterItemsFromList(listItems, {
-  ...opt,
-  selectedPrefix: '',
-  unselectedPrefix: '',
-  limit: 1,
-})
+const filterItemFromList = (listItems, opt) =>
+  filterItemsFromList(listItems, {
+    ...opt,
+    selectedPrefix: "",
+    unselectedPrefix: "",
+    limit: 1,
+  });
 
-const chooseItemFromList = async (list, opt) => await filterItemFromList(list, {
-  ...opt,
-  headerText: '',
-  placeholderText: '',
-});
+const chooseItemFromList = async (list, opt) =>
+  await filterItemFromList(list, {
+    ...opt,
+    headerText: "",
+    placeholderText: "",
+  });
 
-const chooseItemsFromList = async (list, opt) => await filterItemsFromList(list, {
-  ...opt,
-  headerText: '',
-  placeholderText: ''
-})
-
+const chooseItemsFromList = async (list, opt) =>
+  await filterItemsFromList(list, {
+    ...opt,
+    headerText: "",
+    placeholderText: "",
+  });
 
 // const list = ['option a', 'option b', 'option c', 'option d', 'option e', 'option f', 'option shubham', 'option singh', 'apple', 'cider', 'vinegar', 'jasmin', 'yasmin', 'chocolate', 'tailsman', 'chest', 'tresure', 'wonderous', 'conundrum', 'aphoshtate'];
 // const options = {
@@ -284,4 +304,4 @@ const chooseItemsFromList = async (list, opt) => await filterItemsFromList(list,
 //
 // console.log(log.join('\n'))
 
-export { filterItemsFromList, chooseItemFromList }
+export { chooseItemFromList, filterItemsFromList };

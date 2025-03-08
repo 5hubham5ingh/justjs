@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Takes any input and guarantees an array back.
@@ -33,11 +33,11 @@
  */
 
 function isObject(input) {
-  return typeof input === 'object' && input !== null
+  return typeof input === "object" && input !== null;
 }
 
 function isArrayLike(input) {
-  return isObject(input) && typeof input.length === 'number'
+  return isObject(input) && typeof input.length === "number";
 }
 
 /**
@@ -47,18 +47,18 @@ function isArrayLike(input) {
  */
 function arrayify(input) {
   if (Array.isArray(input)) {
-    return input
+    return input;
   } else if (input === undefined) {
-    return []
+    return [];
   } else if (isArrayLike(input) || input instanceof Set) {
-    return Array.from(input)
+    return Array.from(input);
   } else {
-    return [input]
+    return [input];
   }
 }
 
 /* Control Sequence Initiator */
-const csi = '\x1b[';
+const csi = "\x1b[";
 
 /**
  * @exports ansi-escape-sequences
@@ -75,52 +75,52 @@ const ansi = {};
  * console.log(ansi.style.red + 'this is red' + ansi.style.reset)
  */
 ansi.style = {
-  reset: '\x1b[0m',
-  bold: '\x1b[1m',
-  italic: '\x1b[3m',
-  underline: '\x1b[4m',
-  fontDefault: '\x1b[10m',
-  font2: '\x1b[11m',
-  font3: '\x1b[12m',
-  font4: '\x1b[13m',
-  font5: '\x1b[14m',
-  font6: '\x1b[15m',
-  imageNegative: '\x1b[7m',
-  imagePositive: '\x1b[27m',
-  black: '\x1b[30m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m',
-  white: '\x1b[37m',
-  grey: '\x1b[90m',
-  gray: '\x1b[90m',
-  brightRed: '\x1b[91m',
-  brightGreen: '\x1b[92m',
-  brightYellow: '\x1b[93m',
-  brightBlue: '\x1b[94m',
-  brightMagenta: '\x1b[95m',
-  brightCyan: '\x1b[96m',
-  brightWhite: '\x1b[97m',
-  'bg-black': '\x1b[40m',
-  'bg-red': '\x1b[41m',
-  'bg-green': '\x1b[42m',
-  'bg-yellow': '\x1b[43m',
-  'bg-blue': '\x1b[44m',
-  'bg-magenta': '\x1b[45m',
-  'bg-cyan': '\x1b[46m',
-  'bg-white': '\x1b[47m',
-  'bg-grey': '\x1b[100m',
-  'bg-gray': '\x1b[100m',
-  'bg-brightRed': '\x1b[101m',
-  'bg-brightGreen': '\x1b[102m',
-  'bg-brightYellow': '\x1b[103m',
-  'bg-brightBlue': '\x1b[104m',
-  'bg-brightMagenta': '\x1b[105m',
-  'bg-brightCyan': '\x1b[106m',
-  'bg-brightWhite': '\x1b[107m'
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
+  italic: "\x1b[3m",
+  underline: "\x1b[4m",
+  fontDefault: "\x1b[10m",
+  font2: "\x1b[11m",
+  font3: "\x1b[12m",
+  font4: "\x1b[13m",
+  font5: "\x1b[14m",
+  font6: "\x1b[15m",
+  imageNegative: "\x1b[7m",
+  imagePositive: "\x1b[27m",
+  black: "\x1b[30m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  magenta: "\x1b[35m",
+  cyan: "\x1b[36m",
+  white: "\x1b[37m",
+  grey: "\x1b[90m",
+  gray: "\x1b[90m",
+  brightRed: "\x1b[91m",
+  brightGreen: "\x1b[92m",
+  brightYellow: "\x1b[93m",
+  brightBlue: "\x1b[94m",
+  brightMagenta: "\x1b[95m",
+  brightCyan: "\x1b[96m",
+  brightWhite: "\x1b[97m",
+  "bg-black": "\x1b[40m",
+  "bg-red": "\x1b[41m",
+  "bg-green": "\x1b[42m",
+  "bg-yellow": "\x1b[43m",
+  "bg-blue": "\x1b[44m",
+  "bg-magenta": "\x1b[45m",
+  "bg-cyan": "\x1b[46m",
+  "bg-white": "\x1b[47m",
+  "bg-grey": "\x1b[100m",
+  "bg-gray": "\x1b[100m",
+  "bg-brightRed": "\x1b[101m",
+  "bg-brightGreen": "\x1b[102m",
+  "bg-brightYellow": "\x1b[103m",
+  "bg-brightBlue": "\x1b[104m",
+  "bg-brightMagenta": "\x1b[105m",
+  "bg-brightCyan": "\x1b[106m",
+  "bg-brightWhite": "\x1b[107m",
 };
 
 /**
@@ -133,8 +133,8 @@ ansi.style = {
  * > ansi.rgb(120, 0, 120)
  * '\u001b[38;2;120;0;120m'
  */
-ansi.rgb = function(r, g, b) {
-  return `\x1b[38;2;${r};${g};${b}m`
+ansi.rgb = function (r, g, b) {
+  return `\x1b[38;2;${r};${g};${b}m`;
 };
 
 /**
@@ -147,10 +147,9 @@ ansi.rgb = function(r, g, b) {
  * > ansi.bgRgb(120, 0, 120)
  * '\u001b[48;2;120;0;120m'
  */
-ansi.bgRgb = function(r, g, b) {
-  return `\x1b[48;2;${r};${g};${b}m`
+ansi.bgRgb = function (r, g, b) {
+  return `\x1b[48;2;${r};${g};${b}m`;
 };
-
 
 /**
  * Returns RGB colour codes from Hexadecimal colour code
@@ -160,18 +159,18 @@ ansi.bgRgb = function(r, g, b) {
  * > ansi.hexToRgb('#32a852')
  * [50, 168, 81]
  */
-ansi.hexToRgb = function(hex) {
-  hex = hex.replace(/^#/, '');
+ansi.hexToRgb = function (hex) {
+  hex = hex.replace(/^#/, "");
   if (hex.length === 3) {
-    hex = hex.split('').map(function(hex) {
+    hex = hex.split("").map(function (hex) {
       return hex + hex;
-    }).join('');
+    }).join("");
   }
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
   return [r, g, b];
-}
+};
 
 /**
  * Returns a 24-bit "true colour" foreground colour escape sequence.
@@ -179,13 +178,12 @@ ansi.hexToRgb = function(hex) {
  * @returns {number[]}
  * @example
  * > ansi.hex('#32a852')
- *'\u001b[48;2;120;0;120m'
+ * '\u001b[48;2;120;0;120m'
  */
-ansi.hex = function(hex) {
-  const [r, g, b] = ansi.hexToRgb(hex)
-  return ansi.rgb(r, g, b)
-}
-
+ansi.hex = function (hex) {
+  const [r, g, b] = ansi.hexToRgb(hex);
+  return ansi.rgb(r, g, b);
+};
 
 /**
  * Returns a 24-bit "true colour" background colour escape sequence.
@@ -193,12 +191,12 @@ ansi.hex = function(hex) {
  * @returns {number[]}
  * @example
  * > ansi.bgHex('#32a852')
- *'\u001b[48;2;120;0;120m'
+ * '\u001b[48;2;120;0;120m'
  */
-ansi.bgHex = function(hex) {
+ansi.bgHex = function (hex) {
   const [r, g, b] = ansi.hexToRgb(hex);
   return ansi.bgRgb(r, g, b);
-}
+};
 
 /**
  * Returns an ansi sequence setting one or more styles.
@@ -214,23 +212,23 @@ ansi.bgHex = function(hex) {
  * > ansi.styles([ 'bg-red', 'rgb(200,200,200)' ])
  * '\u001b[41m\u001b[38;2;200;200;200m'
  */
-ansi.styles = function(styles) {
+ansi.styles = function (styles) {
   styles = arrayify(styles);
   return styles
-    .map(function(effect) {
+    .map(function (effect) {
       const rgbMatches = effect.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
       const bgRgbMatches = effect.match(/bg-rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
       if (bgRgbMatches) {
         const [full, r, g, b] = bgRgbMatches;
-        return ansi.bgRgb(r, g, b)
+        return ansi.bgRgb(r, g, b);
       } else if (rgbMatches) {
         const [full, r, g, b] = rgbMatches;
-        return ansi.rgb(r, g, b)
+        return ansi.rgb(r, g, b);
       } else {
-        return ansi.style[effect]
+        return ansi.style[effect];
       }
     })
-    .join('')
+    .join("");
 };
 
 /**
@@ -259,11 +257,11 @@ ansi.styles = function(styles) {
  * > ansi.format('Inline styling: [bg-rgb(255,128,0) bold]{something}')
  * 'Inline styling: \u001b[48;2;255;128;0m\u001b[1msomething\u001b[0m'
  */
-ansi.format = function(str, styleArray) {
+ansi.format = function (str, styleArray) {
   const re = /\[([\w\s-\(\),]+)\]{([^]*?)}/;
   let matches;
   str = String(str);
-  if (!str) return ''
+  if (!str) return "";
 
   while (matches = str.match(re)) {
     const inlineStyles = matches[1].split(/\s+/);
@@ -273,18 +271,18 @@ ansi.format = function(str, styleArray) {
 
   return (styleArray && styleArray.length)
     ? ansi.styles(styleArray) + str + ansi.style.reset
-    : str
+    : str;
 };
 
 ansi.stripStyle = ({ text, onlyFirst = false } = {}) => {
   const pattern = [
-    '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
-    '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))'
-  ].join('|');
+    "[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)",
+    "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))",
+  ].join("|");
 
-  const regEx = new RegExp(pattern, onlyFirst ? undefined : 'g');
+  const regEx = new RegExp(pattern, onlyFirst ? undefined : "g");
 
-  return typeof text === 'string' ? text.replace(regEx, '') : text;
+  return typeof text === "string" ? text.replace(regEx, "") : text;
 };
 
 /**
@@ -296,49 +294,63 @@ ansi.cursor = {
    * @param [lines=1] {number}
    * @return {string}
    */
-  up: function(lines) { return csi + (lines || 1) + 'A' },
+  up: function (lines) {
+    return csi + (lines || 1) + "A";
+  },
 
   /**
    * Moves the cursor `lines` cells down. If the cursor is already at the edge of the screen, this has no effect
    * @param [lines=1] {number}
    * @return {string}
    */
-  down: function(lines) { return csi + (lines || 1) + 'B' },
+  down: function (lines) {
+    return csi + (lines || 1) + "B";
+  },
 
   /**
    * Moves the cursor `lines` cells forward. If the cursor is already at the edge of the screen, this has no effect
    * @param [lines=1] {number}
    * @return {string}
    */
-  forward: function(lines) { return csi + (lines || 1) + 'C' },
+  forward: function (lines) {
+    return csi + (lines || 1) + "C";
+  },
 
   /**
    * Moves the cursor `lines` cells back. If the cursor is already at the edge of the screen, this has no effect
    * @param [lines=1] {number}
    * @return {string}
    */
-  back: function(lines) { return csi + (lines || 1) + 'D' },
+  back: function (lines) {
+    return csi + (lines || 1) + "D";
+  },
 
   /**
    * Moves cursor to beginning of the line n lines down.
    * @param [lines=1] {number}
    * @return {string}
    */
-  nextLine: function(lines) { return csi + (lines || 1) + 'E' },
+  nextLine: function (lines) {
+    return csi + (lines || 1) + "E";
+  },
 
   /**
    * Moves cursor to beginning of the line n lines up.
    * @param [lines=1] {number}
    * @return {string}
    */
-  previousLine: function(lines) { return csi + (lines || 1) + 'F' },
+  previousLine: function (lines) {
+    return csi + (lines || 1) + "F";
+  },
 
   /**
    * Moves the cursor to column n.
    * @param n {number} - column number
    * @return {string}
    */
-  horizontalAbsolute: function(n) { return csi + n + 'G' },
+  horizontalAbsolute: function (n) {
+    return csi + n + "G";
+  },
 
   /**
    * Moves the cursor to row n, column m. The values are 1-based, and default to 1 (top left corner) if omitted.
@@ -346,17 +358,19 @@ ansi.cursor = {
    * @param m {number} - column number
    * @return {string}
    */
-  position: function(n, m) { return csi + (n || 1) + ';' + (m || 1) + 'H' },
+  position: function (n, m) {
+    return csi + (n || 1) + ";" + (m || 1) + "H";
+  },
 
   /**
    * Hides the cursor
    */
-  hide: csi + '?25l',
+  hide: csi + "?25l",
 
   /**
    * Shows the cursor
    */
-  show: csi + '?25h'
+  show: csi + "?25h",
 };
 
 /**
@@ -368,13 +382,17 @@ ansi.erase = {
    * @param n {number}
    * @return {string}
    */
-  display: function(n) { return csi + (n || 0) + 'J' },
+  display: function (n) {
+    return csi + (n || 0) + "J";
+  },
 
   /**
    * Erases part of the line. If n is zero (or missing), clear from cursor to the end of the line. If n is one, clear from cursor to beginning of the line. If n is two, clear entire line. Cursor position does not change.
    * @param n {number}
    * @return {string}
    */
-  inLine: function(n) { return csi + (n || 0) + 'K' }
+  inLine: function (n) {
+    return csi + (n || 0) + "K";
+  },
 };
 export { ansi };

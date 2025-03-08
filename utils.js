@@ -103,6 +103,47 @@ export const writeFile = (content, path) => {
   }, "writeFile");
 };
 
+export function readFileToArrayBuffer(filePath) {
+  let file = null;
+  try {
+    // Open the file in binary read mode
+    file = STD.open(filePath, "rb");
+    if (!file) {
+      throw new Error(`Could not open file: ${filePath}`);
+    }
+
+    // Get file size by seeking to end and getting position
+    const fileSize = file.seek(0, STD.SEEK_END);
+    if (fileSize < 0) {
+      throw new Error("Failed to determine file size");
+    }
+
+    // Reset file position to start
+    if (file.seek(0, STD.SEEK_SET) !== 0) {
+      throw new Error("Failed to reset file position");
+    }
+
+    // Create ArrayBuffer to hold file contents
+    const buffer = new ArrayBuffer(fileSize);
+
+    // Read the entire file
+    const bytesRead = file.read(buffer, 0, fileSize);
+    if (bytesRead !== fileSize) {
+      throw new Error(
+        `Failed to read entire file: read ${bytesRead} of ${fileSize} bytes`,
+      );
+    }
+
+    return buffer;
+  } catch (error) {
+    throw new Error(`Error reading file ${filePath}: ${error.message}`);
+  } finally {
+    if (file !== null) {
+      file.close();
+    }
+  }
+}
+
 /**
  * @param {string} dir - directory path
  */
