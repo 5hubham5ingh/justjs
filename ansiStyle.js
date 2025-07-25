@@ -133,7 +133,7 @@ ansi.style = {
  * > ansi.rgb(120, 0, 120)
  * '\u001b[38;2;120;0;120m'
  */
-ansi.rgb = function (r, g, b) {
+ansi.rgb = function(r, g, b) {
   return `\x1b[38;2;${r};${g};${b}m`;
 };
 
@@ -147,7 +147,7 @@ ansi.rgb = function (r, g, b) {
  * > ansi.bgRgb(120, 0, 120)
  * '\u001b[48;2;120;0;120m'
  */
-ansi.bgRgb = function (r, g, b) {
+ansi.bgRgb = function(r, g, b) {
   return `\x1b[48;2;${r};${g};${b}m`;
 };
 
@@ -159,10 +159,10 @@ ansi.bgRgb = function (r, g, b) {
  * > ansi.hexToRgb('#32a852')
  * [50, 168, 81]
  */
-ansi.hexToRgb = function (hex) {
+ansi.hexToRgb = function(hex) {
   hex = hex.replace(/^#/, "");
   if (hex.length === 3) {
-    hex = hex.split("").map(function (hex) {
+    hex = hex.split("").map(function(hex) {
       return hex + hex;
     }).join("");
   }
@@ -180,7 +180,7 @@ ansi.hexToRgb = function (hex) {
  * > ansi.hex('#32a852')
  * '\u001b[48;2;120;0;120m'
  */
-ansi.hex = function (hex) {
+ansi.hex = function(hex) {
   const [r, g, b] = ansi.hexToRgb(hex);
   return ansi.rgb(r, g, b);
 };
@@ -193,37 +193,53 @@ ansi.hex = function (hex) {
  * > ansi.bgHex('#32a852')
  * '\u001b[48;2;120;0;120m'
  */
-ansi.bgHex = function (hex) {
+ansi.bgHex = function(hex) {
   const [r, g, b] = ansi.hexToRgb(hex);
   return ansi.bgRgb(r, g, b);
 };
 
+
 /**
- * Returns an ansi sequence setting one or more styles.
- * @param {string | string[]} - One or more style strings.
- * @returns {string}
+ * Returns an ANSI sequence setting one or more styles, including:
+ * - Named styles like "green", "underline"
+ * - RGB colors like "rgb(255,0,0)" or "bg-rgb(0,0,255)"
+ * - Hex colors like "#ff00ff" or "bg-#00ffcc"
+ *
+ * @param {string | string[]} styles - One or more style strings.
+ * @returns {string} The ANSI escape sequence for the given styles.
+ *
  * @example
- * > ansi.styles('green')
- * '\u001b[32m'
+ * ansi.styles('green')
+ * // => '\u001b[32m'
  *
- * > ansi.styles([ 'green', 'underline' ])
- * '\u001b[32m\u001b[4m'
+ * ansi.styles(['green', 'underline'])
+ * // => '\u001b[32m\u001b[4m'
  *
- * > ansi.styles([ 'bg-red', 'rgb(200,200,200)' ])
- * '\u001b[41m\u001b[38;2;200;200;200m'
+ * ansi.styles(['bg-red', 'rgb(200,200,200)'])
+ * // => '\u001b[41m\u001b[38;2;200;200;200m'
+ *
+ * ansi.styles(['#ff00ff', 'bg-#0033aa'])
+ * // => '\u001b[38;2;255;0;255m\u001b[48;2;0;51;170m'
  */
-ansi.styles = function (styles) {
+ansi.styles = function(styles) {
   styles = arrayify(styles);
   return styles
-    .map(function (effect) {
-      const rgbMatches = effect.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-      const bgRgbMatches = effect.match(/bg-rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    .map(function(effect) {
+      const rgbMatches = effect.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+      const bgRgbMatches = effect.match(/^bg-rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+      const hexMatch = effect.match(/^#([0-9a-fA-F]{6})$/);
+      const bgHexMatch = effect.match(/^bg-#([0-9a-fA-F]{6})$/);
+
       if (bgRgbMatches) {
-        const [full, r, g, b] = bgRgbMatches;
+        const [, r, g, b] = bgRgbMatches;
         return ansi.bgRgb(r, g, b);
       } else if (rgbMatches) {
-        const [full, r, g, b] = rgbMatches;
+        const [, r, g, b] = rgbMatches;
         return ansi.rgb(r, g, b);
+      } else if (bgHexMatch) {
+        return ansi.bgHex(`#${bgHexMatch[1]}`);
+      } else if (hexMatch) {
+        return ansi.hex(`#${hexMatch[1]}`);
       } else {
         return ansi.style[effect];
       }
@@ -257,7 +273,7 @@ ansi.styles = function (styles) {
  * > ansi.format('Inline styling: [bg-rgb(255,128,0) bold]{something}')
  * 'Inline styling: \u001b[48;2;255;128;0m\u001b[1msomething\u001b[0m'
  */
-ansi.format = function (str, styleArray) {
+ansi.format = function(str, styleArray) {
   const re = /\[([\w\s-\(\),]+)\]{([^]*?)}/;
   let matches;
   str = String(str);
@@ -294,7 +310,7 @@ ansi.cursor = {
    * @param [lines=1] {number}
    * @return {string}
    */
-  up: function (lines) {
+  up: function(lines) {
     return csi + (lines || 1) + "A";
   },
 
@@ -303,7 +319,7 @@ ansi.cursor = {
    * @param [lines=1] {number}
    * @return {string}
    */
-  down: function (lines) {
+  down: function(lines) {
     return csi + (lines || 1) + "B";
   },
 
@@ -312,7 +328,7 @@ ansi.cursor = {
    * @param [lines=1] {number}
    * @return {string}
    */
-  forward: function (lines) {
+  forward: function(lines) {
     return csi + (lines || 1) + "C";
   },
 
@@ -321,7 +337,7 @@ ansi.cursor = {
    * @param [lines=1] {number}
    * @return {string}
    */
-  back: function (lines) {
+  back: function(lines) {
     return csi + (lines || 1) + "D";
   },
 
@@ -330,7 +346,7 @@ ansi.cursor = {
    * @param [lines=1] {number}
    * @return {string}
    */
-  nextLine: function (lines) {
+  nextLine: function(lines) {
     return csi + (lines || 1) + "E";
   },
 
@@ -339,7 +355,7 @@ ansi.cursor = {
    * @param [lines=1] {number}
    * @return {string}
    */
-  previousLine: function (lines) {
+  previousLine: function(lines) {
     return csi + (lines || 1) + "F";
   },
 
@@ -348,7 +364,7 @@ ansi.cursor = {
    * @param n {number} - column number
    * @return {string}
    */
-  horizontalAbsolute: function (n) {
+  horizontalAbsolute: function(n) {
     return csi + n + "G";
   },
 
@@ -358,7 +374,7 @@ ansi.cursor = {
    * @param m {number} - column number
    * @return {string}
    */
-  position: function (n, m) {
+  position: function(n, m) {
     return csi + (n || 1) + ";" + (m || 1) + "H";
   },
 
@@ -382,7 +398,7 @@ ansi.erase = {
    * @param n {number}
    * @return {string}
    */
-  display: function (n) {
+  display: function(n) {
     return csi + (n || 0) + "J";
   },
 
@@ -391,7 +407,7 @@ ansi.erase = {
    * @param n {number}
    * @return {string}
    */
-  inLine: function (n) {
+  inLine: function(n) {
     return csi + (n || 0) + "K";
   },
 };
