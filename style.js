@@ -1,4 +1,4 @@
-import { ansi } from "./helpers/ansiStyle.js";
+import { ansi } from "./ansiStyle.js";
 
 /**
  * Used for {input} and {write} functions
@@ -203,9 +203,8 @@ const style = (text, opt) => {
       ).join("\n");
       currTextHeight = currText.split("\n").length;
       currText = currText.concat(
-        `\n${opt.background ?? ""}${" ".repeat(currStyle.width)}${
-          opt.background ? ansi.style.reset : ""
-        }` // apply background colour
+        `\n${opt.background ?? ""}${" ".repeat(currStyle.width)}${opt.background ? ansi.style.reset : ""
+          }` // apply background colour
           .repeat(currStyle.height - currTextHeight),
       ); // add blank lines below the text to attain the opt.height
       break;
@@ -219,9 +218,8 @@ const style = (text, opt) => {
       ).join("\n");
       currTextHeight = currText.split("\n").length;
       currText = currText.concat(
-        `\n${opt.background ?? ""}${" ".repeat(currStyle.width)}${
-          opt.background ? ansi.style.reset : ""
-        }` // apply background colour
+        `\n${opt.background ?? ""}${" ".repeat(currStyle.width)}${opt.background ? ansi.style.reset : ""
+          }` // apply background colour
           .repeat(currStyle.height - currTextHeight),
       ); // add blank lines below the text
       break;
@@ -246,11 +244,10 @@ const style = (text, opt) => {
         .join("\n");
 
       // # Add blank lines below the text to align it to the top of the container
-      currText = currText.concat(`\n${
-        (opt.background ?? "") // add background colour to blank lines
-          .concat(" ", opt.background ? ansi.style.reset : "")
-          .repeat(getLineLength(currText))
-      }` // blank line with length equal to the text line
+      currText = currText.concat(`\n${(opt.background ?? "") // add background colour to blank lines
+        .concat(" ", opt.background ? ansi.style.reset : "")
+        .repeat(getLineLength(currText))
+        }` // blank line with length equal to the text line
         .repeat(currStyle.height - currText.split("\n").length)); // add blank lines below the text
       break;
     case Align.BOTTOM:
@@ -262,11 +259,10 @@ const style = (text, opt) => {
           ) // reset colours
       ).join("\n");
 
-      currText = `${opt.background ?? ""}${" ".repeat(currStyle.width)}${
-        opt.background ? ansi.style.reset : ""
-      }\n`.repeat(currStyle.height - currText.split("\n").length).concat(
-        currText,
-      ); // add blank lines above the text
+      currText = `${opt.background ?? ""}${" ".repeat(currStyle.width)}${opt.background ? ansi.style.reset : ""
+        }\n`.repeat(currStyle.height - currText.split("\n").length).concat(
+          currText,
+        ); // add blank lines above the text
       break;
     case Align.MIDDLE:
       const vGap = Math.floor(
@@ -279,14 +275,12 @@ const style = (text, opt) => {
         )
       ).join("\n"); // align left
 
-      currText = `${opt.background ?? ""}${" ".repeat(currStyle.width)}${
-        opt.background ? ansi.style.reset : ""
-      }\n` // blank lines above
+      currText = `${opt.background ?? ""}${" ".repeat(currStyle.width)}${opt.background ? ansi.style.reset : ""
+        }\n` // blank lines above
         .repeat(vGap).concat(
           currText, // text lines
-          `\n${opt.background ?? ""}${" ".repeat(currStyle.width)}${
-            opt.background ? ansi.style.reset : ""
-          }`
+          `\n${opt.background ?? ""}${" ".repeat(currStyle.width)}${opt.background ? ansi.style.reset : ""
+            }`
             .repeat(vGap), // add blank lines below
         );
       break;
@@ -430,7 +424,7 @@ const style2 = (text, options) => {
   const hAlignmentGap = " ".repeat(hGapCount);
   const alignRight = opt.align === Align.RIGHT ? hAlignmentGap : "";
   const alignLeft = opt.align === Align.LEFT ||
-      (opt.align !== Align.RIGHT && opt.align !== Align.CENTER)
+    (opt.align !== Align.RIGHT && opt.align !== Align.CENTER)
     ? hAlignmentGap
     : "";
   const alignCenter = opt.align === Align.CENTER
@@ -444,14 +438,13 @@ const style2 = (text, options) => {
   const lineLength = getLineLength(styledText);
   const lineLengthWithoutBorder = lineLength - opt.marginLeft -
     opt.marginRight - (opt.border === Border.NONE ? 0 : 2);
-  const blankLineWithBorder = `${marginLeft}${borderY}${
-    " ".repeat(lineLengthWithoutBorder)
-  }${borderY}${marginRight}`;
+  const blankLineWithBorder = `${marginLeft}${borderY}${" ".repeat(lineLengthWithoutBorder)
+    }${borderY}${marginRight}`;
 
   const noOfLines = styledText.split("\n").length;
 
   const topAlignmentGap = opt.align === Align.TOP ||
-      (opt.align !== Align.BOTTOM && opt.align !== Align.MIDDLE)
+    (opt.align !== Align.BOTTOM && opt.align !== Align.MIDDLE)
     ? "\n".concat(blankLineWithBorder).repeat(opt.height - noOfLines)
     : "";
   const bottomAlignmentGap = opt.align === Align.BOTTOM
@@ -495,7 +488,7 @@ const multiLineText = `┏┳  •  ┏  ┏
               ┛`;
 const ddName = `shubham
 singh  `;
-const styledTest = style2(multiLineText, {
+const styledTest = style(multiLineText, {
   paddingBottom: 2,
   paddingTop: 2,
   paddingRight: 2,
@@ -511,6 +504,6 @@ const styledTest = style2(multiLineText, {
   background: ansi.style["bg-blue"],
 });
 
-//print('lines: ', styledTest.split('\n').length, 'width: ', styledTest.split('\n')[5].length)
-print(styledTest, getLineLength(styledTest));
+// print('lines: ', styledTest.split('\n').length, 'width: ', styledTest.split('\n')[5].length)
+// print(styledTest, getLineLength(styledTest));
 // print((ansi.style.red ?? '').concat(ansi.style['bg-cyan'] ?? '').concat(multiLineText).concat(ansi.style.reset))
