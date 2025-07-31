@@ -141,6 +141,9 @@ const handleKeysPress = async (keysAndCb) => {
     if (keys.includes(escapeSequence)) {
       await keysAndCb[escapeSequence](escapeSequence, quit);
       escapeSequence = "";
+    } else if (keys.includes("default")) {
+      await keysAndCb["default"](escapeSequence)
+      escapeSequence = ""
     }
     escapeSequence = "";
   }
