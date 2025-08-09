@@ -45,9 +45,32 @@ const keySequences = {
   "Backspace": "\x7F",
 
   // Other special keys
-  "Ctrl+C": "\x03",
-  "Ctrl+Z": "\x1a",
-  "Ctrl+D": "\x04",
+  "Ctrl+A": "\x01",  // SOH (Start of Heading)
+  "Ctrl+B": "\x02",  // STX (Start of Text)
+  "Ctrl+C": "\x03",  // ETX (End of Text)
+  "Ctrl+D": "\x04",  // EOT (End of Transmission)
+  "Ctrl+E": "\x05",  // ENQ (Enquiry)
+  "Ctrl+F": "\x06",  // ACK (Acknowledge)
+  "Ctrl+G": "\x07",  // BEL (Bell)
+  "Ctrl+H": "\x08",  // BS  (Backspace)
+  "Ctrl+I": "\x09",  // HT  (Horizontal Tab)
+  "Ctrl+J": "\x0A",  // LF  (Line Feed / Newline)
+  "Ctrl+K": "\x0B",  // VT  (Vertical Tab)
+  "Ctrl+L": "\x0C",  // FF  (Form Feed)
+  "Ctrl+M": "\x0D",  // CR  (Carriage Return)
+  "Ctrl+N": "\x0E",  // SO  (Shift Out)
+  "Ctrl+O": "\x0F",  // SI  (Shift In)
+  "Ctrl+P": "\x10",  // DLE (Data Link Escape)
+  "Ctrl+Q": "\x11",  // DC1 (Device Control 1)
+  "Ctrl+R": "\x12",  // DC2 (Device Control 2)
+  "Ctrl+S": "\x13",  // DC3 (Device Control 3)
+  "Ctrl+T": "\x14",  // DC4 (Device Control 4)
+  "Ctrl+U": "\x15",  // NAK (Negative Acknowledge)
+  "Ctrl+V": "\x16",  // SYN (Synchronous Idle)
+  "Ctrl+W": "\x17",  // ETB (End of Transmission Block)
+  "Ctrl+X": "\x18",  // CAN (Cancel)
+  "Ctrl+Y": "\x19",  // EM  (End of Medium)
+  "Ctrl+Z": "\x1A",  // SUB (Substitute)
 
   // Key groups
   capitalLetters: "capitalLetters",

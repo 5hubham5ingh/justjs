@@ -21,6 +21,15 @@ export default class Fzf {
     return this.fzf.join(" ");
   }
 
+  /**
+   * Add custom fzf arguments
+   * @returns {Fzf} The current Fzf instance for chaining
+   */
+  custom(arg) {
+    this.fzf.push(arg);
+    return this;
+  }
+
   // === SEARCH OPTIONS ===
 
   /**

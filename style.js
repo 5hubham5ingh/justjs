@@ -183,7 +183,7 @@ const DEFAULT_STYLE = {
  *
  * @returns {string}
  */
-const style = (text, opt) => {
+export const style = (text, opt) => {
   const currStyle = { ...DEFAULT_STYLE, ...opt };
   if (currStyle.height < 1) currStyle.height = text.split("\n").length;
   if (currStyle.width < getLineLength(text)) {
@@ -397,7 +397,7 @@ const getBorders = (borderType) => {
   };
 };
 
-const style2 = (text, options) => {
+export const style2 = (text, options) => {
   const opt = { ...DEFAULT_STYLE, ...options };
   opt.width = (() => {
     const currentWidth = opt.width - getLineLength(text) + opt.marginRight +

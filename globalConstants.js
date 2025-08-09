@@ -1,7 +1,10 @@
 import * as std from "../qjs-ext-lib/src/std.js";
 import * as os from "../qjs-ext-lib/src/os.js";
 import { ansi } from "./ansiStyle.js";
-import { exec as execAsync } from "../qjs-ext-lib/src/process.js";
+import {
+  exec as execAsync,
+  execSync as exec,
+} from "../qjs-ext-lib/src/process.js";
 import { cursorShow } from "./cursor.js";
 
 globalThis.OS = os;
@@ -59,6 +62,7 @@ globalThis.SystemError = class SystemError extends Error {
 };
 
 globalThis.execAsync = execAsync;
+globalThis.exec = exec;
 
 const handleError = (error, blockName) => {
   if (error instanceof SystemError || (error === EXIT)) throw error;
