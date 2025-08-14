@@ -8,8 +8,8 @@ import {
   eraseScreen,
   scrollDown,
   scrollUp,
-} from "./helpers/cursor.js";
-import { handleKeysPress, keySequences } from "./helpers/terminal.js";
+} from "./cursor.js";
+import { handleKeysPress, keySequences } from "./terminal.js";
 
 const log = [];
 
@@ -80,9 +80,8 @@ let unselectedPrefix = " ○ ";
 let prompt = "> ";
 
 const drawLayout = (header, inputField, items) => {
-  const ui = `\n${header ? header + "\n" : ""}${
-    inputField ? (prompt ?? "") + inputField + "\n" : ""
-  }${items.join("\n")}`;
+  const ui = `\n${header ? header + "\n" : ""}${inputField ? (prompt ?? "") + inputField + "\n" : ""
+    }${items.join("\n")}`;
   print(clearScreen, cursorTo(0, 0), ui, scrollUp);
 };
 
@@ -292,15 +291,15 @@ const chooseItemsFromList = async (list, opt) =>
     placeholderText: "",
   });
 
-// const list = ['option a', 'option b', 'option c', 'option d', 'option e', 'option f', 'option shubham', 'option singh', 'apple', 'cider', 'vinegar', 'jasmin', 'yasmin', 'chocolate', 'tailsman', 'chest', 'tresure', 'wonderous', 'conundrum', 'aphoshtate'];
-// const options = {
-//   headerText: 'Filter',
-//   placeholderText: 'Type to search...',
-//   value: '.*'
-// }
-//const selected = await filterItemFromList(list, options).catch(err => print(err))
+const list = ['option a', 'option b', 'option c', 'option d', 'option e', 'option f', 'option shubham', 'option singh', 'apple', 'cider', 'vinegar', 'jasmin', 'yasmin', 'chocolate', 'tailsman', 'chest', 'tresure', 'wonderous', 'conundrum', 'aphoshtate'];
+const options = {
+  headerText: 'Filter',
+  placeholderText: 'Type to search...',
+  value: '.*'
+}
+const selected = await filterItemFromList(list, options).catch(err => print(err))
 // const selected = await chooseItemsFromList(list, options)
-// console.log('Retured from filter: ', JSON.stringify(selected))
+console.log('Retured from filter: ', JSON.stringify(selected))
 //
 // console.log(log.join('\n'))
 
